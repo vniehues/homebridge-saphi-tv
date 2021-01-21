@@ -6,6 +6,7 @@ import { SaphiTvPlatform } from './platform';
 
 import fetch from 'node-fetch';
 import wol from 'wake_on_lan';
+import { Input } from './input';
 
 /**
  * Platform Accessory
@@ -93,6 +94,7 @@ export class TelevisionAccessory {
   ip_address: string;
 
   startup_time: number;
+  public readonly inputs: Input[] = [];
 
   portNo = 1925;
 
@@ -120,7 +122,10 @@ export class TelevisionAccessory {
     this.ambi_poweron = config.ambi_poweron as boolean;
     this.ambi_poweroff = config.ambi_poweroff as boolean;
     this.has_ambilight = config.has_ambilight as boolean;
+    this.inputs = config.inputs as [];
     this.name = config.name as string;
+
+    this.platform.log.debug('inputs: ', this.inputs);
 
     this.input_url =
       this.protocol +
@@ -170,8 +175,23 @@ export class TelevisionAccessory {
     }
 
 
-    // get/set the services
+
+    // get/set the service
     this.tvService = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
+
+    if (this.inputs && this.inputs.length > 0) {
+      this.inputs.forEach((input: Input, index) => {
+        const inputService = this.accessory.addService(this.platform.Service.InputSource, 'input' + input.position, input.name);
+        inputService
+          .setCharacteristic(this.platform.Characteristic.ConfiguredName, input.name)
+          .setCharacteristic(this.platform.Characteristic.Identifier, index)
+          .setCharacteristic(this.platform.Characteristic.CurrentVisibilityState, this.platform.Characteristic.CurrentVisibilityState.SHOWN)
+          .setCharacteristic(this.platform.Characteristic.IsConfigured, this.platform.Characteristic.IsConfigured.CONFIGURED)
+          .setCharacteristic(this.platform.Characteristic.InputSourceType, this.platform.Characteristic.InputSourceType.APPLICATION);
+
+        this.tvService.addLinkedService(inputService);
+      });
+    }
 
 
     // set accessory information
@@ -206,12 +226,9 @@ export class TelevisionAccessory {
     // handle input source changes
     this.tvService.getCharacteristic(this.platform.Characteristic.ActiveIdentifier)
       .on('set', (newValue, callback) => {
-
-        // the value will be the value you set for the Identifier Characteristic
-        // on the Input Source service that was selected - see input sources below.
-
-        this.platform.log.info('set Active Identifier => setNewValue: ' + newValue);
         callback(null);
+        this.SetActiveIdentifier(newValue);
+        this.platform.log.info('set Active Identifier => setNewValue: ' + newValue);
       });
 
     // handle remote control input
@@ -275,9 +292,6 @@ export class TelevisionAccessory {
         // don't forget to callback!
         callback(null);
       });
-
-
-    // this.tvService.addLinkedService(this.inputService);
 
 
 
@@ -404,5 +418,87 @@ export class TelevisionAccessory {
         body: JSON.stringify(this.ambihue_off_body),
       });
     }
+  }
+
+
+  async SetActiveIdentifier(value: CharacteristicValue) {
+    const input = this.inputs[value as number];
+
+    this.platform.log.debug('Setting input to: ', input.name);
+
+    var keyToPress = { key: 'Home' };
+    var stepsToMake = input.position;
+
+    // Open application bar
+    await fetch(this.input_url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(keyToPress),
+    })
+    .then(async () => {await this.waitFor(300)})
+      .then(async () => {
+
+        if(stepsToMake === 0)
+        {
+          await fetch(this.input_url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ key: 'Confirm' }),
+          })
+          .then(async () => {await this.waitFor(300)});
+        }
+
+        else if (stepsToMake >= 0)
+        {
+
+        for (let index = 0; index <= stepsToMake; stepsToMake--) {
+          if (stepsToMake > 0) {
+            this.platform.log.debug('right');
+            keyToPress = { key: 'CursorRight' };
+          } else if (stepsToMake == 0) {
+            this.platform.log.debug('confirm');
+            keyToPress = { key: 'Confirm' };
+          }
+          await fetch(this.input_url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(keyToPress),
+          })
+          .then(async () => {await this.waitFor(300)});
+        }
+
+      }
+
+      else if (stepsToMake <= 0)
+      {
+
+
+        for (let index = 0; index >= stepsToMake; stepsToMake++) {
+          if (stepsToMake < 0) {
+            this.platform.log.debug('left');
+            keyToPress = { key: 'CursorLeft' };
+          } else if (stepsToMake == 0) {
+            this.platform.log.debug('confirm');
+            keyToPress = { key: 'Confirm' };
+          }
+          await fetch(this.input_url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(keyToPress),
+          })
+          .then(async () => {await this.waitFor(300)});
+        }
+      }
+    }
+      );
+    
   }
 }
