@@ -5,25 +5,11 @@
   "schema": {
     "type": "object",
     "properties": {
-      "inputs": {
-        "title": "Inputs",
-        "type": "array",
-        "items": {
-          "title": "Input",
-          "type": "object",
-          "properties": {
-            "key": {
-              "title": "Id",
-              "type": "string",
-              "required": true
-            },
-            "value": {
-              "title": "Name",
-              "type": "string",
-              "required": true
-            }
-          }
-        }
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "required": true,
+        "default": "Example Dynamic Platform"
       }
     }
   }

@@ -22,8 +22,6 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
   ) {
     this.log.debug('Finished initializing platform:', this.config.name);
 
-    
-
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
@@ -52,13 +50,6 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-
-
-    // let inputs = [];
-    // inputs = this.config.inputs;
-
-    const inputs = {};
-    this.config.Inputs.forEach(x => inputs[x.key] = x.value);
 
     // EXAMPLE ONLY
     // A real plugin you would discover accessories from the local network, cloud services
