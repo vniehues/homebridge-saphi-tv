@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "SaphiTV",
   "pluginType": "platform",
   "singular": true,
   "schema": {
@@ -9,7 +9,25 @@
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "Saphi TV"
+      },
+      "serial": {
+        "title": "Serialnumber",
+        "type": "string",
+        "required": true,
+        "default": "ABCD123"
+      },
+      "ip_adress": {
+        "title": "IP Adress",
+        "type": "string",
+        "required": true,
+        "default": "192.168.x.x"
+      },
+      "wol_adress": {
+        "title": "WOL Adress",
+        "type": "string",
+        "required": true,
+        "default": "20:DE:20:DE:20:DE"
       }
     }
   }
