@@ -1,4 +1,4 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
+import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, IndependentPlatformPlugin } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { TelevisionAccessory } from './platformAccessory';
@@ -8,7 +8,7 @@ import { TelevisionAccessory } from './platformAccessory';
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
-export class SaphiTvPlatform implements DynamicPlatformPlugin {
+export class SaphiTvPlatform implements IndependentPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
 
@@ -20,80 +20,21 @@ export class SaphiTvPlatform implements DynamicPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
+    this.publishExampleExternalAccessory();
     this.log.info('Finished initializing platform:', this.config.name);
-
-    this.api.on('didFinishLaunching', () => {
-      log.debug('Executed didFinishLaunching callback');
-      // run the method to discover / register your devices as accessories
-      this.discoverDevices();
-    });
   }
 
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
-    // add the restored accessory to the accessories cache so we can track if it has already been registered
     this.accessories.push(accessory);
   }
 
-  /**
-   * This is an example method showing how to register discovered accessories.
-   * Accessories must only be registered once, previously created accessories
-   * must not be registered again to prevent "duplicate UUID" errors.
-   */
-  discoverDevices() {
+  publishExampleExternalAccessory() {
+    const uuid = this.api.hap.uuid.generate('SaphiTvDevice');
+    const accessory = new this.api.platformAccessory('SaphiTv', uuid);
+    new TelevisionAccessory(this, accessory, this.config);
+    this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
 
-    // EXAMPLE ONLY
-    // A real plugin you would discover accessories from the local network, cloud services
-    // or a user-defined array in the platform config.
-    const Devices = [
-      {
-        uniqueId: 'SaphiTvDevice',
-        displayName: 'SaphiTv',
-      },
-    ];
-
-    // loop over the discovered devices and register each one if it has not already been registered
-    for (const device of Devices) {
-
-      // generate a unique id for the accessory this should be generated from
-      // something globally unique, but constant, for example, the device serial
-      // number or MAC address
-      const uuid = this.api.hap.uuid.generate(device.uniqueId);
-
-      // see if an accessory with the same uuid has already been registered and restored from
-      // the cached devices we stored in the `configureAccessory` method above
-      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
-
-      if (existingAccessory) {
-        // the accessory already exists
-        if (device) {
-          this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-          new TelevisionAccessory(this, existingAccessory, this.config);
-          
-          // update accessory cache with any changes to the accessory details and information
-          this.api.updatePlatformAccessories([existingAccessory]);
-        } else if (!device) {
-          // remove platform accessories when no longer present
-          this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-          this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
-        }
-      } else {
-        // the accessory does not yet exist, so we need to create it
-        this.log.info('Adding new accessory:', device.displayName);
-        // create a new accessory
-        const accessory = new this.api.platformAccessory(device.displayName, uuid);
-        // store a copy of the device object in the `accessory.context`
-        // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.device = device;
-        // create the accessory handler for the newly create accessory
-        // this is imported from `platformAccessory.ts`
-        new TelevisionAccessory(this, accessory, this.config);
-        // link the accessory to your platform
-        // this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-
-        this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
-      }
-    }
   }
 }
