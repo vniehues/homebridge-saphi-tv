@@ -46,6 +46,28 @@
         "type": "boolean",
         "required": true,
         "default": false
+      },
+      "inputs": {
+        "title": "Inputs",
+        "type": "array",
+        "items": {
+          "title": "Input",
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "placeholder": "Input Name",
+              "required": true
+            },
+            "position": {
+              "title": "Position",
+              "type": "number",
+              "placeholder": "0-10",
+              "required": true
+            }
+          }
+        }
       }
     }
   }
