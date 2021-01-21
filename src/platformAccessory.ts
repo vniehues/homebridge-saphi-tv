@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-this-alias */
-/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable max-len */
+
 import { Service, PlatformAccessory, CharacteristicSetCallback, CharacteristicGetCallback, PlatformConfig, Categories, Characteristic, CharacteristicValue } from 'homebridge';
 
 import { SaphiTvPlatform } from './platform';
 
 import fetch from 'node-fetch';
 import wol from 'wake_on_lan';
-import { DH_UNABLE_TO_CHECK_GENERATOR } from 'constants';
 
 /**
  * Platform Accessory
@@ -15,14 +13,19 @@ import { DH_UNABLE_TO_CHECK_GENERATOR } from 'constants';
  * Each accessory may expose multiple services of different service types.
  */
 export class TelevisionAccessory {
-  input_url: string;  
-  
+  ambihue_url: string;
+  ambi_poweron: boolean;
+  ambi_poweroff: boolean;
+  has_ambilight: boolean;
+  name: string;
+  // inputService: Service;
+
   waitFor(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-  
+
   wolRequest(url) {
-    return new Promise(resolve => setTimeout(() => {
+    return new Promise(() => {
       const that = this;
 
       this.platform.log.debug('calling WOL with URL %s', url);
@@ -31,7 +34,7 @@ export class TelevisionAccessory {
         return;
       }
       if (url.substring(0, 3).toUpperCase() === 'WOL') {
-      //Wake on lan request
+        //Wake on lan request
         const macAddress = url.replace(/^WOL[:]?[/]?[/]?/gi, '');
         this.platform.log.debug('Executing WakeOnLan request to ' + macAddress);
         wol.wake(macAddress, (error) => {
@@ -48,10 +51,30 @@ export class TelevisionAccessory {
           that.platform.log.warn('WOL-Error: ');
         }
       }
-    }, 20));
+    }
+    );
   }
 
-  private service: Service;
+  timeoutAfter(ms, promise) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('TIMEOUT'))
+      }, ms)
+
+      promise
+        .then(value => {
+          clearTimeout(timer)
+          resolve(value)
+        })
+        .catch(reason => {
+          clearTimeout(timer)
+          reject(reason)
+        })
+    })
+  }
+
+  private tvService: Service;
+  private ambihueService?: Service;
 
   /**
    * These are just used to create a working example
@@ -63,18 +86,27 @@ export class TelevisionAccessory {
   };
 
   power_url: string;
+  input_url: string;
 
-  protocol= 'http';
+  protocol = 'http';
 
   ip_address: string;
 
-  portNo= 1925;
+  startup_time: number;
 
-  api_version= 6;
-    
+  portNo = 1925;
+
+  api_version = 6;
+
   power_on_body = { powerstate: 'On' };
-
   power_off_body = { powerstate: 'Standby' };
+
+
+
+  ambihue_on_body = { power: 'On' };
+  ambihue_off_body = { power: 'Off' };
+
+
   wol_url: string;
 
   constructor(
@@ -84,79 +116,95 @@ export class TelevisionAccessory {
   ) {
     this.ip_address = config.ip_adress as string;
     this.wol_url = config.wol_adress as string;
+    this.startup_time = config.startup_time as number;
+    this.ambi_poweron = config.ambi_poweron as boolean;
+    this.ambi_poweroff = config.ambi_poweroff as boolean;
+    this.has_ambilight = config.has_ambilight as boolean;
+    this.name = config.name as string;
 
     this.input_url =
-    this.protocol +
-    'http://' +
-    this.ip_address +
-    ':' +
-    this.portNo +
-    '/' +
-    this.api_version +
-    '/input/key';
-    
-    // this.ambihue_url =
-    // this.protocol +
-    // "://" +
-    // this.ip_address +
-    // ":" +
-    // this.portNo +
-    // "/" +
-    // this.api_version +
-    // "/HueLamp/power";
-    
-    // this.ambihue_on_body = JSON.stringify({ power: "On" });
-    // this.ambihue_off_body = JSON.stringify({ power: "Off" });
-    
+      this.protocol +
+      '://' +
+      this.ip_address +
+      ':' +
+      this.portNo +
+      '/' +
+      this.api_version +
+      '/input/key';
+
+    this.ambihue_url =
+      this.protocol +
+      "://" +
+      this.ip_address +
+      ":" +
+      this.portNo +
+      "/" +
+      this.api_version +
+      "/HueLamp/power";
+
     this.power_url =
-          this.protocol +
-          '://' +
-          this.ip_address +
-          ':' +
-          this.portNo +
-          '/' +
-          this.api_version +
-          '/powerstate';
+      this.protocol +
+      '://' +
+      this.ip_address +
+      ':' +
+      this.portNo +
+      '/' +
+      this.api_version +
+      '/powerstate';
 
 
+    if (this.has_ambilight) {
+
+      this.ambihueService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+      this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
+        .on('get', (callback) => {
+          this.GetAmbiHue();
+          callback(null, this.TvState.AmbiHueActive);
+          this.platform.log.info('Get AmbiHue');
+        })
+        .on('set', (newValue, callback) => {
+          this.SetAmbiHue(newValue);
+          callback(null);
+          this.platform.log.info('set AmbiHue => ' + newValue);
+        });
+    }
 
 
+    // get/set the services
+    this.tvService = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
 
-    // get/set the service 
-    this.service = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
 
     // set accessory information
     this.accessory.category = Categories.TELEVISION;
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Default-Manufacturer')
       .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Test-Serial');
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
 
     // set the tv name
-    this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, 'test');
+    this.tvService.setCharacteristic(this.platform.Characteristic.Name, this.name);
+    this.tvService.setCharacteristic(this.platform.Characteristic.ConfiguredName, this.name);
 
     // set sleep discovery characteristic
-    this.service.setCharacteristic(this.platform.Characteristic.SleepDiscoveryMode, this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
+    this.tvService.setCharacteristic(this.platform.Characteristic.SleepDiscoveryMode, this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
 
     // handle on / off events using the Active characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.Active)
+    this.tvService.getCharacteristic(this.platform.Characteristic.Active)
       .on('set', (newValue, callback) => {
-        this.SetActive(newValue, callback);
-        this.platform.log.info('set Active => setNewValue: ' + newValue);
-        // this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
-        // callback(null);
+        callback(null);
+        this.SetActive(newValue);
+        this.platform.log.info('set Active => ' + newValue);
       })
       .on('get', (callback) => {
-        this.GetActive( callback);
+        callback(null, this.TvState.TvActive);
+        this.GetActive();
         this.platform.log.info('Get Active');
-        // this.service.updateCharacteristic(this.platform.Characteristic.Active, 1);
-        // callback(null);
-      }) ;
+      });
 
-    this.service.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, 1);
+    this.tvService.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, 1);
 
     // handle input source changes
-    this.service.getCharacteristic(this.platform.Characteristic.ActiveIdentifier)
+    this.tvService.getCharacteristic(this.platform.Characteristic.ActiveIdentifier)
       .on('set', (newValue, callback) => {
 
         // the value will be the value you set for the Identifier Characteristic
@@ -167,9 +215,9 @@ export class TelevisionAccessory {
       });
 
     // handle remote control input
-    this.service.getCharacteristic(this.platform.Characteristic.RemoteKey)
+    this.tvService.getCharacteristic(this.platform.Characteristic.RemoteKey)
       .on('set', (newValue, callback) => {
-        switch(newValue) {
+        switch (newValue) {
           case this.platform.Characteristic.RemoteKey.REWIND: {
             this.platform.log.info('set Remote Key Pressed: REWIND');
             break;
@@ -228,100 +276,133 @@ export class TelevisionAccessory {
         callback(null);
       });
 
+
+    // this.tvService.addLinkedService(this.inputService);
+
+
+
     setInterval(() => {
+      this.GetActive();
 
-      // TODO: Add getPowerState and getAmbilightState here and update every minute.
-
-      // push the new value to HomeKit
-      // motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
-      // motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
-
-      this.platform.log.debug('Triggering interval:', 'test');
-    }, 60000);
+      if (this.has_ambilight) {
+        this.GetAmbiHue();
+      }
+      this.platform.log.debug('Triggering interval');
+    }, 30000);
   }
 
-  // setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
 
-  //   // implement your own code to turn your device on/off
-  //   this.exampleStates.On = value as boolean;
-
-  //   this.platform.log.debug('Set Characteristic On ->', value);
-
-  // }
-
-  async GetActive(callback: CharacteristicGetCallback) {
-    
-    const isOn = this.TvState.TvActive;
-    callback(null, isOn);
-
+  async GetActive() {
     await fetch(this.power_url)
       .then(response => response.json())
       .then(result => {
         this.platform.log.debug('Success:', result);
-        if(JSON.stringify(result) === JSON.stringify(this.power_on_body)) {
+        if (JSON.stringify(result) === JSON.stringify(this.power_on_body)) {
           this.TvState.TvActive = true;
-        } else if(JSON.stringify(result) === JSON.stringify(this.power_off_body)) {
+        } else if (JSON.stringify(result) === JSON.stringify(this.power_off_body)) {
           this.TvState.TvActive = false;
         }
+        this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
       })
       .catch(error => {
         this.platform.log.debug('Error getPowerState : ', error);
         this.TvState.TvActive = false;
       });
-    this.service.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
   }
 
-  async SetActive(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-    callback(null);
+  async SetActive(value: CharacteristicValue) {
     const newPowerState = value === this.platform.Characteristic.Active.ACTIVE;
     this.platform.log.debug('Setting power to: ', newPowerState);
-    if (newPowerState){
-      await this.wolRequest(this.wol_url);
-      //TODO: Hier Ambilight stuff einfügen
-      // .then(
-      //   async () => {
-      //     await this.waitFor(2000)
-      //       .then( async () => {
-      //         await fetch(this.input_url, {
-      //           method: 'POST', // or 'PUT'
-      //           headers: {
-      //             'Content-Type': 'application/json',
-      //           },
-      //           body: JSON.stringify({key: 'Standby'}),
-      //         });
-      //       },
-      //       );
-      //   },
-      // );
+    if (newPowerState) {
+
+      if (this.has_ambilight && this.ambi_poweron) {
+
+        this.wolRequest(this.wol_url);
+        await this.waitFor(this.startup_time)
+          .then(() => {
+            this.platform.log.debug('Setting AmbiHue after ', this.startup_time);
+            this.ambihueService?.getCharacteristic(this.platform.Characteristic.On).setValue(true);
+          }
+          );
+
+      }
+      else {
+        await this.wolRequest(this.wol_url);
+      }
     } else {
-      await fetch(this.input_url, {
+
+      if (this.has_ambilight && this.ambi_poweroff) {
+        await fetch(this.ambihue_url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(this.ambihue_off_body),
+        }).then(
+          async () => {
+            await this.waitFor(2500)
+              .then(async () => {
+                await fetch(this.input_url, {
+                  method: 'POST', // or 'PUT'
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ key: 'Standby' }),
+                });
+              },
+              );
+          },
+        );
+      }
+      else {
+        await fetch(this.input_url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ key: 'Standby' }),
+        });
+      }
+    }
+  }
+
+  async GetAmbiHue() {
+    await fetch(this.ambihue_url)
+      .then(response => response.json())
+      .then(result => {
+        this.platform.log.debug('Success:', result);
+        if (JSON.stringify(result) === JSON.stringify(this.ambihue_on_body)) {
+          this.TvState.AmbiHueActive = true;
+        } else if (JSON.stringify(result) === JSON.stringify(this.ambihue_off_body)) {
+          this.TvState.AmbiHueActive = false;
+        }
+        this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
+      })
+      .catch(error => {
+        this.platform.log.debug('Error getAmbihueState : ', error);
+        this.TvState.AmbiHueActive = false;
+      });
+  }
+
+  async SetAmbiHue(value: CharacteristicValue) {
+    const newPowerState = value;
+    this.platform.log.debug('Setting ambihue to: ', newPowerState);
+    if (newPowerState) {
+      await fetch(this.ambihue_url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({key: 'Standby'}),
+        body: JSON.stringify(this.ambihue_on_body),
       });
-      //TODO: Hier Ambilight stuff einfügen// .then(
-      //   async () => {
-      //     await this.waitFor(2000)
-      //       .then( async () => {
-      //         await fetch(this.input_url, {
-      //           method: 'POST', // or 'PUT'
-      //           headers: {
-      //             'Content-Type': 'application/json',
-      //           },
-      //           body: JSON.stringify({key: 'Standby'}),
-      //         });
-      //       },
-      //       );
-      //   },
-      // );
+    } else {
+      await fetch(this.ambihue_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.ambihue_off_body),
+      });
     }
-
-    // const response = await fetch(
-    //   'https://jsonplaceholder.typicode.com/todos',
-    // );
-    // await this.waitFor(3000);
-    // // you must call the callback function
   }
 }

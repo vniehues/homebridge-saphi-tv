@@ -11,12 +11,6 @@
         "required": true,
         "default": "Saphi TV"
       },
-      "serial": {
-        "title": "Serialnumber",
-        "type": "string",
-        "required": true,
-        "default": "ABCD123"
-      },
       "ip_adress": {
         "title": "IP Adress",
         "type": "string",
@@ -28,6 +22,30 @@
         "type": "string",
         "required": true,
         "default": "20:DE:20:DE:20:DE"
+      },
+      "startup_time": {
+        "title": "Startup time (ms)",
+        "type": "number",
+        "required": true,
+        "default": "10000"
+      },
+      "has_ambilight": {
+        "title": "Ambilight + Hue support",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "ambi_poweroff": {
+        "title": "Turn off Ambilight+ before turning off the TV",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "ambi_poweron": {
+        "title": "automatically turn on Ambilight when turning on TV",
+        "type": "boolean",
+        "required": true,
+        "default": false
       }
     }
   }
