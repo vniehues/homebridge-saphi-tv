@@ -269,12 +269,13 @@ export class TelevisionAccessory {
 
     setInterval(() => {
       this.platform.log.debug('Triggering interval');
-      this.timeoutAfter(5000, this.GetActive(null)).catch(() => {this.TvState.TvActive = false}).finally(()=>{ 
+      this.timeoutAfter(5000, this.GetActive(null)).catch(() => {this.platform.log.debug('tv not reachable! setting power to false'); this.TvState.TvActive = false}).finally(()=>{ 
+        
       this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
       });
 
       if (this.has_ambilight) {
-        this.timeoutAfter(5000, this.GetAmbiHue(null)).catch(() => {this.TvState.AmbiHueActive = false}).finally(()=>{ 
+        this.timeoutAfter(5000, this.GetAmbiHue(null)).catch(() => {this.platform.log.debug('tv not reachable! setting ambihue to false'); this.TvState.AmbiHueActive = false}).finally(()=>{ 
         this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
       });
       }
