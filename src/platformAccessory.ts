@@ -73,7 +73,7 @@ export class TelevisionAccessory {
         });
     });
   }
-  
+
   fetchWithPromise = (url: string, body: string) =>
     new Promise((resolve, reject) => {
 
@@ -82,7 +82,7 @@ export class TelevisionAccessory {
         headers: {
           'Content-Type': 'application/json',
         },
-        body:body,
+        body: body,
       })
         .then(resolve)
         .catch(reject);
@@ -435,41 +435,47 @@ export class TelevisionAccessory {
 
   async SetActiveIdentifier(value: CharacteristicValue) {
     const input = this.inputs[value as number];
-    this.platform.log.debug('Setting input to: ', input.name);
-    const stepsToMake = input.position;
+    let stepsToMake = input.position;
     const moves: string[] = [];
 
-    // Open application bar
-    moves.push(JSON.stringify({ key: 'Home' }));
-    for (let index = 0; index < Math.abs(stepsToMake) +1 ; index++) {
-      if(stepsToMake === 0) {
-        moves.push(JSON.stringify({ key: 'Confirm' }));
-      } 
-      if (stepsToMake > 0) {
+    this.platform.log.debug('Setting input to: ', input.name);
 
+    // Build the moves[]
+    moves.push(JSON.stringify({ key: 'Home' }));
+    while (Math.abs(stepsToMake) != 0) {
+      if (stepsToMake > 0) {
         moves.push(JSON.stringify({ key: 'CursorRight' }));
+        stepsToMake--;
       }
       if (stepsToMake < 0) {
         moves.push(JSON.stringify({ key: 'CursorLeft' }));
+        stepsToMake++;
       }
     }
-
+    moves.push(JSON.stringify({ key: 'Confirm' }));
+    
     this.platform.log.debug('Moves: ', moves);
 
 
-    for await (const move of moves) {
-      await fetch(this.input_url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(move),
-      })
-        .then(() => {
-          this.platform.log.debug('finished move ', move)
-          ;
-        });
+    // Execute moves[] one-by-one
+    for (const move of moves) {
+        await fetch(this.input_url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: move,
+        })
+        .then (response => response.text())
+        .then (data => this.platform.log.debug('response: ', data))
+          .then(async() => await this.waitFor(500))
+          .then(() => {
+            this.platform.log.debug('finished move ', move);
+          }).catch(() => {
+            this.platform.log.debug('could not finish move ', move);
+          });
     }
+
     this.platform.log.debug('finished moves!');
   }
 }
