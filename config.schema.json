@@ -25,9 +25,19 @@
       },
       "startup_time": {
         "title": "Startup time (ms)",
-        "type": "number",
+        "type": "integer",
+        "minimum": 10,
+        "maximum": 30,
         "required": true,
-        "default": "10000"
+        "default": 10
+      },
+      "polling_intervall": {
+        "title": "Polling Intervall (s)",
+        "type": "integer",
+        "minimum": 15,
+        "maximum": 120,
+        "required": true,
+        "default": 30
       },
       "has_ambilight": {
         "title": "Ambilight + Hue support",
@@ -60,17 +70,21 @@
               "placeholder": "Input Name",
               "required": true
             },
-            "position": {
-              "title": "Position",
-              "type": "number",
-              "placeholder": "0-10",
-              "required": true
-            },
             "isTV": {
               "title": "IsTV",
               "type": "boolean",
               "placeholder": "0-10",
-              "required": false
+              "required": false,
+              "default" : false
+            },
+            "position": {
+              "title": "Position",
+              "type": "number",
+              "placeholder": "1",
+              "required": true,
+              "condition": {
+                  "functionBody": "return model.inputs[arrayIndices].isTV === false;"
+              }
             }
           }
         }

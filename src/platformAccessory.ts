@@ -19,6 +19,7 @@ export class TelevisionAccessory {
   ambi_poweroff: boolean;
   has_ambilight: boolean;
   name: string;
+  polling_intervall: number;
   // inputService: Service;
 
   waitFor(ms: number) {
@@ -132,12 +133,25 @@ export class TelevisionAccessory {
   ) {
     this.ip_address = config.ip_adress as string;
     this.wol_url = config.wol_adress as string;
-    this.startup_time = config.startup_time as number;
     this.ambi_poweron = config.ambi_poweron as boolean;
     this.ambi_poweroff = config.ambi_poweroff as boolean;
     this.has_ambilight = config.has_ambilight as boolean;
     this.inputs = config.inputs as [];
     this.name = config.name as string;
+
+    this.startup_time = config.startup_time as number * 1000;
+    this.polling_intervall = config.polling_intervall as number * 1000;
+
+    this.platform.log.debug('times: ', this.startup_time, this.polling_intervall);
+    if(this.startup_time < 5 * 1000 || typeof this.startup_time !== "number" || isNaN(this.startup_time))
+    {
+      this.startup_time = 10 * 1000;
+    }
+    if(this.polling_intervall < 15 * 1000 || typeof this.polling_intervall !== "number" || isNaN(this.polling_intervall))
+    {
+      this.polling_intervall = 30 * 1000;
+    }
+    this.platform.log.debug('times: ', this.startup_time, this.polling_intervall)
 
     this.platform.log.debug('inputs: ', this.inputs);
 
@@ -260,7 +274,7 @@ export class TelevisionAccessory {
         this.GetAmbiHue(null);
       }
       this.platform.log.debug('Triggering interval');
-    }, 30000);
+    }, this.polling_intervall);
   }
 
 
