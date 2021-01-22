@@ -1,4 +1,4 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, IndependentPlatformPlugin } from 'homebridge';
+import { API, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, IndependentPlatformPlugin } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { TelevisionAccessory } from './platformAccessory';
@@ -21,7 +21,7 @@ export class SaphiTvPlatform implements IndependentPlatformPlugin {
     public readonly api: API,
   ) {
     this.publishExampleExternalAccessory();
-    this.log.info('Finished initializing platform:', this.config.name);
+    this.log.info('Finished initializing platform:', PLATFORM_NAME);
   }
 
   configureAccessory(accessory: PlatformAccessory) {
@@ -35,6 +35,5 @@ export class SaphiTvPlatform implements IndependentPlatformPlugin {
     const accessory = new this.api.platformAccessory(this.config.name as string, uuid);
     new TelevisionAccessory(this, accessory, this.config);
     this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
-
   }
 }
