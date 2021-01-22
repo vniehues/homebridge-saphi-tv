@@ -177,8 +177,7 @@ export class TelevisionAccessory {
       this.ambihueService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
       this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
         .on('get', (callback) => {
-          this.GetAmbiHue();
-          callback(null, this.TvState.AmbiHueActive);
+          this.GetAmbiHue(callback);
           this.platform.log.info('Get AmbiHue');
         })
         .on('set', (newValue, callback) => {
@@ -230,8 +229,7 @@ export class TelevisionAccessory {
         this.platform.log.info('set Active => ' + newValue);
       })
       .on('get', (callback) => {
-        callback(null, this.TvState.TvActive);
-        this.GetActive();
+        this.GetActive(callback);
         this.platform.log.info('Get Active');
       });
 
@@ -248,79 +246,25 @@ export class TelevisionAccessory {
     // handle remote control input
     this.tvService.getCharacteristic(this.platform.Characteristic.RemoteKey)
       .on('set', (newValue, callback) => {
-        switch (newValue) {
-          case this.platform.Characteristic.RemoteKey.REWIND: {
-            this.platform.log.info('set Remote Key Pressed: REWIND');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.FAST_FORWARD: {
-            this.platform.log.info('set Remote Key Pressed: FAST_FORWARD');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.NEXT_TRACK: {
-            this.platform.log.info('set Remote Key Pressed: NEXT_TRACK');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.PREVIOUS_TRACK: {
-            this.platform.log.info('set Remote Key Pressed: PREVIOUS_TRACK');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.ARROW_UP: {
-            this.platform.log.info('set Remote Key Pressed: ARROW_UP');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.ARROW_DOWN: {
-            this.platform.log.info('set Remote Key Pressed: ARROW_DOWN');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.ARROW_LEFT: {
-            this.platform.log.info('set Remote Key Pressed: ARROW_LEFT');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.ARROW_RIGHT: {
-            this.platform.log.info('set Remote Key Pressed: ARROW_RIGHT');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.SELECT: {
-            this.platform.log.info('set Remote Key Pressed: SELECT');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.BACK: {
-            this.platform.log.info('set Remote Key Pressed: BACK');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.EXIT: {
-            this.platform.log.info('set Remote Key Pressed: EXIT');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.PLAY_PAUSE: {
-            this.platform.log.info('set Remote Key Pressed: PLAY_PAUSE');
-            break;
-          }
-          case this.platform.Characteristic.RemoteKey.INFORMATION: {
-            this.platform.log.info('set Remote Key Pressed: INFORMATION');
-            break;
-          }
-        }
-
-        // don't forget to callback!
         callback(null);
+        this.SendRemoteInput(newValue);
+        this.platform.log.info('Sending RemoteInput: ' + newValue);
       });
 
 
 
     setInterval(() => {
-      this.GetActive();
+      this.GetActive(null);
 
       if (this.has_ambilight) {
-        this.GetAmbiHue();
+        this.GetAmbiHue(null);
       }
       this.platform.log.debug('Triggering interval');
     }, 30000);
   }
 
 
-  async GetActive() {
+  async GetActive(callback) {
     await fetch(this.power_url)
       .then(response => response.json())
       .then(result => {
@@ -330,11 +274,16 @@ export class TelevisionAccessory {
         } else if (JSON.stringify(result) === JSON.stringify(this.power_off_body)) {
           this.TvState.TvActive = false;
         }
-        this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
       })
       .catch(error => {
         this.platform.log.debug('Error getPowerState : ', error);
         this.TvState.TvActive = false;
+      })
+      .finally(() => 
+      {
+        this.platform.log.debug('Now updating PowerState to:', this.TvState.TvActive);
+        this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
+        if(callback){callback(null, this.TvState.TvActive);}
       });
   }
 
@@ -392,7 +341,7 @@ export class TelevisionAccessory {
     }
   }
 
-  async GetAmbiHue() {
+  async GetAmbiHue(callback) {
     await fetch(this.ambihue_url)
       .then(response => response.json())
       .then(result => {
@@ -402,11 +351,16 @@ export class TelevisionAccessory {
         } else if (JSON.stringify(result) === JSON.stringify(this.ambihue_off_body)) {
           this.TvState.AmbiHueActive = false;
         }
-        this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
       })
       .catch(error => {
         this.platform.log.debug('Error getAmbihueState : ', error);
         this.TvState.AmbiHueActive = false;
+      })
+      .finally(() => 
+      {
+        this.platform.log.debug('Now updating AmbiHueState to:', this.TvState.AmbiHueActive);
+        this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.AmbiHueActive);
+        if(callback){callback(null, this.TvState.AmbiHueActive);}
       });
   }
 
@@ -437,50 +391,48 @@ export class TelevisionAccessory {
     const input = this.inputs[value as number];
     this.platform.log.debug('Setting input to: ', input.name);
 
-    if(input.isTV)
-    {
+    if (input.isTV) {
       await fetch(this.input_url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ key: 'WatchTV' }),
-    })
-    .then (response => response.text())
-    .then (data => this.platform.log.debug('response: ', data))
-      .then(async() => await this.waitFor(500))
-      .then(() => {
-        this.platform.log.debug('finished WatchTV');
-      }).catch(() => {
-        this.platform.log.debug('could not finish WatchTV');
-      });
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ key: 'WatchTV' }),
+      })
+        .then(response => response.text())
+        .then(data => this.platform.log.debug('response: ', data))
+        .then(async () => await this.waitFor(500))
+        .then(() => {
+          this.platform.log.debug('finished WatchTV');
+        }).catch(() => {
+          this.platform.log.debug('could not finish WatchTV');
+        });
     }
-    else
-    {
-      
+    else {
 
-    let stepsToMake = input.position;
-    const moves: string[] = [];
 
-    // Build the moves[]
-    moves.push(JSON.stringify({ key: 'Home' }));
-    while (Math.abs(stepsToMake) != 0) {
-      if (stepsToMake > 0) {
-        moves.push(JSON.stringify({ key: 'CursorRight' }));
-        stepsToMake--;
+      let stepsToMake = input.position;
+      const moves: string[] = [];
+
+      // Build the moves[]
+      moves.push(JSON.stringify({ key: 'Home' }));
+      while (Math.abs(stepsToMake) != 0) {
+        if (stepsToMake > 0) {
+          moves.push(JSON.stringify({ key: 'CursorRight' }));
+          stepsToMake--;
+        }
+        if (stepsToMake < 0) {
+          moves.push(JSON.stringify({ key: 'CursorLeft' }));
+          stepsToMake++;
+        }
       }
-      if (stepsToMake < 0) {
-        moves.push(JSON.stringify({ key: 'CursorLeft' }));
-        stepsToMake++;
-      }
-    }
-    moves.push(JSON.stringify({ key: 'Confirm' }));
-    
-    this.platform.log.debug('Moves: ', moves);
+      moves.push(JSON.stringify({ key: 'Confirm' }));
+
+      this.platform.log.debug('Moves: ', moves);
 
 
-    // Execute moves[] one-by-one
-    for (const move of moves) {
+      // Execute moves[] one-by-one
+      for (const move of moves) {
         await fetch(this.input_url, {
           method: 'POST',
           headers: {
@@ -488,17 +440,96 @@ export class TelevisionAccessory {
           },
           body: move,
         })
-        .then (response => response.text())
-        .then (data => this.platform.log.debug('response: ', data))
-          .then(async() => await this.waitFor(500))
+          .then(response => response.text())
+          .then(data => this.platform.log.debug('response: ', data))
+          .then(async () => await this.waitFor(500))
           .then(() => {
             this.platform.log.debug('finished move ', move);
           }).catch(() => {
             this.platform.log.debug('could not finish move ', move);
           });
+      }
+
+      this.platform.log.debug('finished moves!');
+    }
+  }
+
+
+  async SendRemoteInput(newValue: CharacteristicValue) {
+    let KeyToPress = { key: 'Home' };
+
+    switch (newValue) {
+      case this.platform.Characteristic.RemoteKey.REWIND: {
+        KeyToPress = { key: 'Rewind' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.FAST_FORWARD: {
+        KeyToPress = { key: 'FastForward' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.NEXT_TRACK: {
+
+        KeyToPress = { key: 'Next' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.PREVIOUS_TRACK: {
+
+        KeyToPress = { key: 'Previous' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.ARROW_UP: {
+
+        KeyToPress = { key: 'CursorUp' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.ARROW_DOWN: {
+
+        KeyToPress = { key: 'CursorDown' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.ARROW_LEFT: {
+
+        KeyToPress = { key: 'CursorLeft' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.ARROW_RIGHT: {
+
+        KeyToPress = { key: 'CursorRight' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.SELECT: {
+
+        KeyToPress = { key: 'Confirm' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.BACK: {
+
+        KeyToPress = { key: 'Back' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.EXIT: {
+
+        KeyToPress = { key: 'Exit' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.PLAY_PAUSE: {
+
+        KeyToPress = { key: 'PlayPause' };
+        break;
+      }
+      case this.platform.Characteristic.RemoteKey.INFORMATION: {
+
+        KeyToPress = { key: 'Options' };
+        break;
+      }
     }
 
-    this.platform.log.debug('finished moves!');
-  }
+    await fetch(this.input_url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(KeyToPress),
+    })
   }
 }
