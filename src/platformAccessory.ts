@@ -268,12 +268,16 @@ export class TelevisionAccessory {
 
 
     setInterval(() => {
-      this.GetActive(null);
+      this.platform.log.debug('Triggering interval');
+      this.timeoutAfter(5000, this.GetActive(null)).catch(() => {this.TvState.TvActive = false}).finally(()=>{ 
+      this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
+      });
 
       if (this.has_ambilight) {
-        this.GetAmbiHue(null);
+        this.timeoutAfter(5000, this.GetAmbiHue(null)).catch(() => {this.TvState.AmbiHueActive = false}).finally(()=>{ 
+        this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
+      });
       }
-      this.platform.log.debug('Triggering interval');
     }, this.polling_intervall);
   }
 
@@ -373,7 +377,7 @@ export class TelevisionAccessory {
       .finally(() => 
       {
         this.platform.log.debug('Now updating AmbiHueState to:', this.TvState.AmbiHueActive);
-        this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.AmbiHueActive);
+        this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
         if(callback){callback(null, this.TvState.AmbiHueActive);}
       });
   }
