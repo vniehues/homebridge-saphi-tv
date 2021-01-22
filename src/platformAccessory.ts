@@ -52,27 +52,41 @@ export class TelevisionAccessory {
           that.platform.log.warn('WOL-Error: ');
         }
       }
-    }
+    },
     );
   }
 
   timeoutAfter(ms, promise) {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        reject(new Error('TIMEOUT'))
-      }, ms)
+        reject(new Error('TIMEOUT'));
+      }, ms);
 
       promise
         .then(value => {
-          clearTimeout(timer)
-          resolve(value)
+          clearTimeout(timer);
+          resolve(value);
         })
         .catch(reason => {
-          clearTimeout(timer)
-          reject(reason)
-        })
-    })
+          clearTimeout(timer);
+          reject(reason);
+        });
+    });
   }
+  
+  fetchWithPromise = (url: string, body: string) =>
+    new Promise((resolve, reject) => {
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body:body,
+      })
+        .then(resolve)
+        .catch(reject);
+    });
 
   private tvService: Service;
   private ambihueService?: Service;
@@ -139,13 +153,13 @@ export class TelevisionAccessory {
 
     this.ambihue_url =
       this.protocol +
-      "://" +
+      '://' +
       this.ip_address +
-      ":" +
+      ':' +
       this.portNo +
-      "/" +
+      '/' +
       this.api_version +
-      "/HueLamp/power";
+      '/HueLamp/power';
 
     this.power_url =
       this.protocol +
@@ -336,11 +350,10 @@ export class TelevisionAccessory {
           .then(() => {
             this.platform.log.debug('Setting AmbiHue after ', this.startup_time);
             this.ambihueService?.getCharacteristic(this.platform.Characteristic.On).setValue(true);
-          }
+          },
           );
 
-      }
-      else {
+      } else {
         await this.wolRequest(this.wol_url);
       }
     } else {
@@ -367,8 +380,7 @@ export class TelevisionAccessory {
               );
           },
         );
-      }
-      else {
+      } else {
         await fetch(this.input_url, {
           method: 'POST',
           headers: {
@@ -423,82 +435,41 @@ export class TelevisionAccessory {
 
   async SetActiveIdentifier(value: CharacteristicValue) {
     const input = this.inputs[value as number];
-
     this.platform.log.debug('Setting input to: ', input.name);
-
-    var keyToPress = { key: 'Home' };
-    var stepsToMake = input.position;
+    const stepsToMake = input.position;
+    const moves: string[] = [];
 
     // Open application bar
-    await fetch(this.input_url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(keyToPress),
-    })
-    .then(async () => {await this.waitFor(300)})
-      .then(async () => {
+    moves.push(JSON.stringify({ key: 'Home' }));
+    for (let index = 0; index < Math.abs(stepsToMake) +1 ; index++) {
+      if(stepsToMake === 0) {
+        moves.push(JSON.stringify({ key: 'Confirm' }));
+      } 
+      if (stepsToMake > 0) {
 
-        if(stepsToMake === 0)
-        {
-          await fetch(this.input_url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ key: 'Confirm' }),
-          })
-          .then(async () => {await this.waitFor(300)});
-        }
-
-        else if (stepsToMake >= 0)
-        {
-
-        for (let index = 0; index <= stepsToMake; stepsToMake--) {
-          if (stepsToMake > 0) {
-            this.platform.log.debug('right');
-            keyToPress = { key: 'CursorRight' };
-          } else if (stepsToMake == 0) {
-            this.platform.log.debug('confirm');
-            keyToPress = { key: 'Confirm' };
-          }
-          await fetch(this.input_url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(keyToPress),
-          })
-          .then(async () => {await this.waitFor(300)});
-        }
-
+        moves.push(JSON.stringify({ key: 'CursorRight' }));
       }
-
-      else if (stepsToMake <= 0)
-      {
-
-
-        for (let index = 0; index >= stepsToMake; stepsToMake++) {
-          if (stepsToMake < 0) {
-            this.platform.log.debug('left');
-            keyToPress = { key: 'CursorLeft' };
-          } else if (stepsToMake == 0) {
-            this.platform.log.debug('confirm');
-            keyToPress = { key: 'Confirm' };
-          }
-          await fetch(this.input_url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(keyToPress),
-          })
-          .then(async () => {await this.waitFor(300)});
-        }
+      if (stepsToMake < 0) {
+        moves.push(JSON.stringify({ key: 'CursorLeft' }));
       }
     }
-      );
-    
+
+    this.platform.log.debug('Moves: ', moves);
+
+
+    for await (const move of moves) {
+      await fetch(this.input_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(move),
+      })
+        .then(() => {
+          this.platform.log.debug('finished move ', move)
+          ;
+        });
+    }
+    this.platform.log.debug('finished moves!');
   }
 }
