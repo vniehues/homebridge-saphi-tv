@@ -6,4 +6,4 @@ export const PLATFORM_NAME = 'SaphiTV';
 /**
  * This must match the name of your plugin as defined the package.json
  */
-export const PLUGIN_NAME = 'homebridge-SaphiTV';
+export const PLUGIN_NAME = 'homebridge-saphi-tv';

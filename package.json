@@ -1,5 +1,5 @@
 {
-  "private": true,
+  "private": false,
   "displayName": "SaphiTV",
   "name": "homebridge-saphi-tv",
   "version": "0.0.2-beta.0",
