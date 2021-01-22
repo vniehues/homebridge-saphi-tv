@@ -4,7 +4,7 @@ import { Service, PlatformAccessory, CharacteristicSetCallback, CharacteristicGe
 
 import { SaphiTvPlatform } from './platform';
 
-import fetch from 'node-fetch';
+import fetchTimeout from 'fetch-timeout';
 import wol from 'wake_on_lan';
 import { Input } from './input';
 
@@ -57,34 +57,16 @@ export class TelevisionAccessory {
     );
   }
 
-  timeoutAfter(ms, promise) {
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error('TIMEOUT'));
-      }, ms);
-
-      promise
-        .then(value => {
-          clearTimeout(timer);
-          resolve(value);
-        })
-        .catch(reason => {
-          clearTimeout(timer);
-          reject(reason);
-        });
-    });
-  }
-
   fetchWithPromise = (url: string, body: string) =>
     new Promise((resolve, reject) => {
 
-      fetch(url, {
+      fetchTimeout(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: body,
-      })
+      }, 5000, 'Timeout Error')
         .then(resolve)
         .catch(reject);
     });
@@ -269,22 +251,21 @@ export class TelevisionAccessory {
 
     setInterval(() => {
       this.platform.log.debug('Triggering interval');
-      this.timeoutAfter(5000, this.GetActive(null)).catch(() => {this.platform.log.debug('tv not reachable! setting power to false'); this.TvState.TvActive = false}).finally(()=>{ 
-        
-      this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
-      });
-
+      this.GetActive(null);
       if (this.has_ambilight) {
-        this.timeoutAfter(5000, this.GetAmbiHue(null)).catch(() => {this.platform.log.debug('tv not reachable! setting ambihue to false'); this.TvState.AmbiHueActive = false}).finally(()=>{ 
-        this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
-      });
+        this.GetAmbiHue(null);
       }
     }, this.polling_intervall);
   }
 
 
   async GetActive(callback) {
-    await fetch(this.power_url)
+    await fetchTimeout(this.power_url,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }, 5000, 'Timeout Error')
       .then(response => response.json())
       .then(result => {
         this.platform.log.debug('Success:', result);
@@ -298,12 +279,12 @@ export class TelevisionAccessory {
         this.platform.log.debug('Error getPowerState : ', error);
         this.TvState.TvActive = false;
       })
-      .finally(() => 
-      {
-        this.platform.log.debug('Now updating PowerState to:', this.TvState.TvActive);
-        this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
-        if(callback){callback(null, this.TvState.TvActive);}
-      });
+    .finally(() => 
+    {
+      this.platform.log.debug('Now updating PowerState to:', this.TvState.TvActive);
+      this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
+      if(callback){callback(null, this.TvState.TvActive);}
+    })
   }
 
   async SetActive(value: CharacteristicValue) {
@@ -327,7 +308,7 @@ export class TelevisionAccessory {
     } else {
 
       if (this.has_ambilight && this.ambi_poweroff) {
-        await fetch(this.ambihue_url, {
+        await fetchTimeout(this.ambihue_url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -337,7 +318,7 @@ export class TelevisionAccessory {
           async () => {
             await this.waitFor(2500)
               .then(async () => {
-                await fetch(this.input_url, {
+                await fetchTimeout(this.input_url, {
                   method: 'POST', // or 'PUT'
                   headers: {
                     'Content-Type': 'application/json',
@@ -349,7 +330,7 @@ export class TelevisionAccessory {
           },
         );
       } else {
-        await fetch(this.input_url, {
+        await fetchTimeout(this.input_url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -361,7 +342,12 @@ export class TelevisionAccessory {
   }
 
   async GetAmbiHue(callback) {
-    await fetch(this.ambihue_url)
+    await fetchTimeout(this.ambihue_url,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },  5000, 'Timeout Error')
       .then(response => response.json())
       .then(result => {
         this.platform.log.debug('Success:', result);
@@ -375,19 +361,19 @@ export class TelevisionAccessory {
         this.platform.log.debug('Error getAmbihueState : ', error);
         this.TvState.AmbiHueActive = false;
       })
-      .finally(() => 
-      {
-        this.platform.log.debug('Now updating AmbiHueState to:', this.TvState.AmbiHueActive);
-        this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
-        if(callback){callback(null, this.TvState.AmbiHueActive);}
-      });
+    .finally(() => 
+    {
+      this.platform.log.debug('Now updating AmbiHueState to:', this.TvState.AmbiHueActive);
+      this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
+      if(callback){callback(null, this.TvState.AmbiHueActive);}
+    })
   }
 
   async SetAmbiHue(value: CharacteristicValue) {
     const newPowerState = value;
     this.platform.log.debug('Setting ambihue to: ', newPowerState);
     if (newPowerState) {
-      await fetch(this.ambihue_url, {
+      await fetchTimeout(this.ambihue_url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -395,7 +381,7 @@ export class TelevisionAccessory {
         body: JSON.stringify(this.ambihue_on_body),
       });
     } else {
-      await fetch(this.ambihue_url, {
+      await fetchTimeout(this.ambihue_url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -411,7 +397,7 @@ export class TelevisionAccessory {
     this.platform.log.debug('Setting input to: ', input.name);
 
     if (input.isTV) {
-      await fetch(this.input_url, {
+      await fetchTimeout(this.input_url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -452,7 +438,7 @@ export class TelevisionAccessory {
 
       // Execute moves[] one-by-one
       for (const move of moves) {
-        await fetch(this.input_url, {
+        await fetchTimeout(this.input_url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -543,7 +529,7 @@ export class TelevisionAccessory {
       }
     }
 
-    await fetch(this.input_url, {
+    await fetchTimeout(this.input_url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
