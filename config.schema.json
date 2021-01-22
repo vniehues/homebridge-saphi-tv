@@ -65,6 +65,12 @@
               "type": "number",
               "placeholder": "0-10",
               "required": true
+            },
+            "isTV": {
+              "title": "IsTV",
+              "type": "boolean",
+              "placeholder": "0-10",
+              "required": false
             }
           }
         }

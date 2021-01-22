@@ -435,10 +435,32 @@ export class TelevisionAccessory {
 
   async SetActiveIdentifier(value: CharacteristicValue) {
     const input = this.inputs[value as number];
+    this.platform.log.debug('Setting input to: ', input.name);
+
+    if(input.isTV)
+    {
+      await fetch(this.input_url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ key: 'WatchTV' }),
+    })
+    .then (response => response.text())
+    .then (data => this.platform.log.debug('response: ', data))
+      .then(async() => await this.waitFor(500))
+      .then(() => {
+        this.platform.log.debug('finished WatchTV');
+      }).catch(() => {
+        this.platform.log.debug('could not finish WatchTV');
+      });
+    }
+    else
+    {
+      
+
     let stepsToMake = input.position;
     const moves: string[] = [];
-
-    this.platform.log.debug('Setting input to: ', input.name);
 
     // Build the moves[]
     moves.push(JSON.stringify({ key: 'Home' }));
@@ -477,5 +499,6 @@ export class TelevisionAccessory {
     }
 
     this.platform.log.debug('finished moves!');
+  }
   }
 }
