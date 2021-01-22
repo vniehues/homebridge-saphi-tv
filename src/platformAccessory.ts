@@ -20,7 +20,6 @@ export class TelevisionAccessory {
   has_ambilight: boolean;
   name: string;
   polling_intervall: number;
-  // inputService: Service;
 
   waitFor(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -243,6 +242,32 @@ export class TelevisionAccessory {
         this.platform.log.info('Sending RemoteInput: ' + newValue);
       });
 
+    const speakerService = this.accessory.addService(
+      this.platform.Service.TelevisionSpeaker,
+    );
+  
+    speakerService
+      .setCharacteristic(
+        this.platform.Characteristic.Active,
+        this.platform.Characteristic.Active.ACTIVE,
+      )
+      .setCharacteristic(
+        this.platform.Characteristic.VolumeControlType,
+        this.platform.Characteristic.VolumeControlType.ABSOLUTE,
+      );
+  
+    // handle volume control
+    speakerService
+      .getCharacteristic(this.platform.Characteristic.VolumeSelector)
+      .on('set', (newValue, callback) => {
+        callback(null, null);
+        this.platform.log.info('set VolumeSelector => setNewValue: ' + newValue);
+        if (newValue === this.platform.Characteristic.VolumeSelector.DECREMENT) {
+          this.SendRemoteInput('VolumeDown');
+        } else {
+          this.SendRemoteInput('VolumeUp');
+        }
+      });
 
 
     setInterval(() => {
@@ -522,6 +547,14 @@ export class TelevisionAccessory {
       case this.platform.Characteristic.RemoteKey.INFORMATION: {
 
         KeyToPress = { key: 'Options' };
+        break;
+      }
+      case 'VolumeUp': {
+        KeyToPress = { key: 'VolumeUp' };
+        break;
+      }
+      case 'VolumeDown': {
+        KeyToPress = { key: 'VolumeDown' };
         break;
       }
     }
