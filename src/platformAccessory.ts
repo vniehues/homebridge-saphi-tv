@@ -168,12 +168,7 @@ export class TelevisionAccessory {
       this.ambihueService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
       this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
         .on('get', (callback) => {
-          if(this.TvState.AmbiHueActive) {
-            callback(null, this.TvState.AmbiHueActive);
-            this.GetAmbiHue(null);
-          } else {
-            this.GetAmbiHue(callback);
-          }
+          this.GetAmbiHue(callback);
           this.platform.log.info('Get AmbiHue');
         })
         .on('set', (newValue, callback) => {
@@ -225,12 +220,7 @@ export class TelevisionAccessory {
         this.platform.log.info('set Active => ' + newValue);
       })
       .on('get', (callback) => {
-        if(this.TvState.TvActive) {
-          callback(null, this.TvState.TvActive);
-          this.GetActive(null);
-        } else {
-          this.GetActive(callback);
-        }
+        this.GetActive(callback);
         this.platform.log.info('Get Active');
       });
 
@@ -297,6 +287,12 @@ export class TelevisionAccessory {
         'Content-Type': 'application/json',
       }, 
     }, 5000, 'Timeout Error')
+      .then((response) => {
+        if (!response.ok) {
+          throw Error(response.status);
+        }
+        return response;
+      })
       .then(response => response.json())
       .then(result => {
         this.platform.log.debug('Success:', result);
@@ -307,8 +303,10 @@ export class TelevisionAccessory {
         }
       })
       .catch(error => {
+        if (error.response && error.response.status !== 200) {
+          this.TvState.TvActive = false;
+        }
         this.platform.log.debug('Error getPowerState : ', error);
-        this.TvState.TvActive = false;
       })
       .finally(() => {
         this.platform.log.debug('Now updating PowerState to:', this.TvState.TvActive);
@@ -330,7 +328,9 @@ export class TelevisionAccessory {
         await this.waitFor(this.startup_time)
           .then(() => {
             this.platform.log.debug('Setting AmbiHue after ', this.startup_time);
-            this.ambihueService?.getCharacteristic(this.platform.Characteristic.On).setValue(true);
+            if(this.ambihueService) {
+              this.ambihueService.getCharacteristic(this.platform.Characteristic.On).setValue(true);
+            }
           },
           );
 
@@ -380,6 +380,12 @@ export class TelevisionAccessory {
         'Content-Type': 'application/json',
       },
     }, 5000, 'Timeout Error')
+      .then((response) => {
+        if (!response.ok) {
+          throw Error(response.status);
+        }
+        return response;
+      })
       .then(response => response.json())
       .then(result => {
         this.platform.log.debug('Success:', result);
@@ -390,12 +396,16 @@ export class TelevisionAccessory {
         }
       })
       .catch(error => {
+        if (error.response && error.response.status !== 200) {
+          this.TvState.AmbiHueActive = false;
+        }
         this.platform.log.debug('Error getAmbihueState : ', error);
-        this.TvState.AmbiHueActive = false;
       })
       .finally(() => {
         this.platform.log.debug('Now updating AmbiHueState to:', this.TvState.AmbiHueActive);
-        this.ambihueService?.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
+        if(this.ambihueService) {
+          this.ambihueService.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
+        }
         if(callback){
           callback(null, this.TvState.AmbiHueActive);
         }
