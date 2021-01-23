@@ -168,7 +168,12 @@ export class TelevisionAccessory {
       this.ambihueService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
       this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
         .on('get', (callback) => {
-          this.GetAmbiHue(callback);
+          if(this.TvState.AmbiHueActive) {
+            callback(null, this.TvState.AmbiHueActive);
+            this.GetAmbiHue(null);
+          } else {
+            this.GetAmbiHue(callback);
+          }
           this.platform.log.info('Get AmbiHue');
         })
         .on('set', (newValue, callback) => {
@@ -220,7 +225,12 @@ export class TelevisionAccessory {
         this.platform.log.info('set Active => ' + newValue);
       })
       .on('get', (callback) => {
-        this.GetActive(callback);
+        if(this.TvState.TvActive) {
+          callback(null, this.TvState.TvActive);
+          this.GetActive(null);
+        } else {
+          this.GetActive(callback);
+        }
         this.platform.log.info('Get Active');
       });
 
