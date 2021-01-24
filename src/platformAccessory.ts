@@ -479,14 +479,24 @@ export class TelevisionAccessory {
         moves.push(JSON.stringify({ key: 'Source' }));
         moves.push(JSON.stringify({ key: 'CursorDown' }));
       }
-      while (Math.abs(stepsToMake) !== 0) {
-        if (stepsToMake > 0) {
-          moves.push(JSON.stringify({ key: 'CursorRight' }));
-          stepsToMake--;
-        }
-        if (stepsToMake < 0) {
-          moves.push(JSON.stringify({ key: 'CursorLeft' }));
-          stepsToMake++;
+      if(input.type as InputType === InputType.Channel) {
+        moves.push(JSON.stringify({ key: 'WatchTV' }));
+        const num = Math.abs(input.position);
+        const digits = num.toString().split('');
+        digits.forEach(digit => {
+          moves.push(JSON.stringify({ key: digit }));
+        });
+      } else {
+        
+        while (Math.abs(stepsToMake) !== 0) {
+          if (stepsToMake > 0) {
+            moves.push(JSON.stringify({ key: 'CursorRight' }));
+            stepsToMake--;
+          }
+          if (stepsToMake < 0) {
+            moves.push(JSON.stringify({ key: 'CursorLeft' }));
+            stepsToMake++;
+          }
         }
       }
       moves.push(JSON.stringify({ key: 'Confirm' }));

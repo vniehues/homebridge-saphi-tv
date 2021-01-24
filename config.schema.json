@@ -76,7 +76,8 @@
               "oneOf": [
                 { "title": "TV", "enum": ["TV"] },
                 { "title": "App", "enum": ["APP"] },
-                { "title": "Source", "enum": ["SOURCE"] }
+                { "title": "Source", "enum": ["SOURCE"] },
+                { "title": "Channel", "enum": ["CHANNEL"] }
               ],
               "required": true,
               "default" : "TV",

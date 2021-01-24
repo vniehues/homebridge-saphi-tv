@@ -1,5 +1,6 @@
 export enum InputType {
     TV = 'TV',
     App = 'APP',
-    Source = 'SOURCE'
+    Source = 'SOURCE',
+    Channel = 'CHANNEL'
   }
