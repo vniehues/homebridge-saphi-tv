@@ -75,6 +75,9 @@
         "type": "boolean",
         "required": true,
         "default": true,
+        "condition": {
+            "functionBody": "return model.has_ambilight === true;"
+        },
         "description" : "This will turn off Ambilight+Hue before turning off your TV as a workaround for a know Ambilight+Hue bug where you would get a significant delay"
       },
       "ambi_poweron": {
@@ -82,12 +85,15 @@
         "type": "boolean",
         "required": true,
         "default": false,
+        "condition": {
+            "functionBody": "return model.has_ambilight === true;"
+        },
         "description" : "This will turn on Ambilight+Hue when you start the TV with the home app"
       },
       "inputs": {
         "title": "Inputs",
         "type": "array",
-        "description" : "This allows you to add 'inputs' to your TV.",
+        "description" : "This allows you to add 'inputs' to your TV. TV only sends the 'Watch TV' key. Channel will send the 'Watch TV' key and then input the channel you specified. App will open an App from your 'home' bar (e.g. Netflix). Source will select one of your input sources (e.g. HDMI1).",
         "items": {
           "title": "Input",
           "type": "object",
@@ -108,8 +114,7 @@
                 { "title": "Channel", "enum": ["CHANNEL"] }
               ],
               "required": true,
-              "default" : "TV",
-              "description" : "TV only sends the 'Watch TV' key. Channel will send the 'Watch TV' key and then input the channel you specified. App will open an App from your 'home' bar (e.g. Netflix). Source will select one of your input sources (e.g. HDMI1)."
+              "default" : "TV"
             },
             "position": {
               "title": "Position",
