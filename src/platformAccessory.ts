@@ -484,7 +484,7 @@ export class TelevisionAccessory {
         const num = Math.abs(input.position);
         const digits = num.toString().split('');
         digits.forEach(digit => {
-          moves.push(JSON.stringify({ key: digit }));
+          moves.push(JSON.stringify({ key: 'Digit'+digit }));
         });
       } else {
         
