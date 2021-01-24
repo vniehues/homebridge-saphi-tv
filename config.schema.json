@@ -9,57 +9,85 @@
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Saphi TV"
+        "default": "Saphi TV",
+        "placeholder": "name",
+        "description" : "How you want to Name your TV"
       },
       "ip_adress": {
         "title": "IP Adress",
         "type": "string",
         "required": true,
-        "default": "192.168.x.x"
+        "default": "192.168.x.x",
+        "description" : "IP adress of your TV"
       },
       "wol_adress": {
         "title": "WOL Adress",
         "type": "string",
         "required": true,
-        "default": "20:DE:20:DE:20:DE"
+        "placeholder": "wol://20:DE:20:DE:20:DE",
+        "description" : "WOL adress of your TV (mac-adress)"
       },
       "startup_time": {
-        "title": "Startup time (ms)",
+        "title": "Startup time",
         "type": "integer",
         "minimum": 10,
         "maximum": 30,
         "required": true,
-        "default": 10
+        "default": 10,
+        "description" : "Approximate time your TV takes to start."
       },
-      "polling_intervall": {
-        "title": "Polling Intervall (s)",
+      "timeout": {
+        "title": "Timeout time",
+        "type": "integer",
+        "minimum": 2,
+        "maximum": 15,
+        "required": true,
+        "default": 5,
+        "description" : "This changes how long the plugin waits for answers from your tv. Higher values give your TV more time to respond in case of a bad connection but if it's too high, homekit might return early with a 'No Respone'."
+      },
+      "input_delay": {
+        "title": "Delay between inputs (ms)",
+        "type": "integer",
+        "minimum": 150,
+        "maximum": 1500,
+        "required": true,
+        "default": 600,
+        "description" : "This changes how long the plugin waits between 'key-presses' when commanding your TV. Lower values make it feel more snappy but if it's too low, your TV might not be fast enough or shut down it's API."
+      },
+      "polling_interval": {
+        "title": "Polling Interval (s)",
         "type": "integer",
         "minimum": 15,
         "maximum": 120,
         "required": true,
-        "default": 30
+        "default": 30,
+        "description" : "How often the TV state is updated in the background"
       },
       "has_ambilight": {
         "title": "Ambilight + Hue support",
         "type": "boolean",
         "required": true,
-        "default": true
+        "default": true,
+        "description" : "Checking this will add a switch to your TV to control the Ambilight+Hue option."
       },
       "ambi_poweroff": {
         "title": "Turn off Ambilight+ before turning off the TV",
         "type": "boolean",
         "required": true,
-        "default": true
+        "default": true,
+        "description" : "This will turn off Ambilight+Hue before turning off your TV as a workaround for a know Ambilight+Hue bug where you would get a significant delay"
       },
       "ambi_poweron": {
         "title": "automatically turn on Ambilight when turning on TV",
         "type": "boolean",
         "required": true,
-        "default": false
+        "default": false,
+        "description" : "This will turn on Ambilight+Hue when you start the TV with the home app"
       },
       "inputs": {
         "title": "Inputs",
         "type": "array",
+        "description" : "This allows you to add 'inputs' to your TV.",
         "items": {
           "title": "Input",
           "type": "object",
@@ -81,7 +109,7 @@
               ],
               "required": true,
               "default" : "TV",
-              "description" : "TV = Watch TV, App => e.g. Netflix, Source => e.g. HDMI1"
+              "description" : "TV only sends the 'Watch TV' key. Channel will send the 'Watch TV' key and then input the channel you specified. App will open an App from your 'home' bar (e.g. Netflix). Source will select one of your input sources (e.g. HDMI1)."
             },
             "position": {
               "title": "Position",
@@ -90,7 +118,8 @@
               "required": true,
               "condition": {
                   "functionBody": "return model.inputs[arrayIndices].type !== 'TV';"
-              }
+              },
+              "description" : "Appmode: the position of your app relative to the cursor position when you open the 'home' bar (negative numbers go left, positive numbers go right, 0 immediately confirms). Sourcemode: the position of your app relative to the cursor position when you open the 'sources' bar (negative numbers go left, positive numbers go right, 0 immediately confirms).  Channelmode: the Channel you want to watch. "
             }
           }
         }

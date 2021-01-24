@@ -20,7 +20,9 @@ export class TelevisionAccessory {
   ambi_poweroff: boolean;
   has_ambilight: boolean;
   name: string;
-  polling_intervall: number;
+  polling_interval: number;
+  input_delay: number;
+  timeout: number;
 
   waitFor(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -64,7 +66,7 @@ export class TelevisionAccessory {
           'Content-Type': 'application/json',
         },
         body: body,
-      }, 5000, 'Timeout Error')
+      }, this.timeout, 'Timeout Error')
         .then(resolve)
         .catch(reject);
     });
@@ -120,16 +122,23 @@ export class TelevisionAccessory {
     this.name = config.name as string;
 
     this.startup_time = config.startup_time as number * 1000;
-    this.polling_intervall = config.polling_intervall as number * 1000;
+    this.input_delay = config.input_delay as number;
+    this.timeout = config.timeout as number * 1000;
+    this.polling_interval = config.polling_interval as number * 1000;
 
-    this.platform.log.debug('times: ', this.startup_time, this.polling_intervall);
     if(this.startup_time < 5 * 1000 ||typeof this.startup_time !== 'number' || isNaN(this.startup_time)) {
       this.startup_time = 10 * 1000;
     }
-    if(this.polling_intervall < 15 * 1000 ||typeof this.polling_intervall !== 'number' || isNaN(this.polling_intervall)) {
-      this.polling_intervall = 30 * 1000;
+    if(this.polling_interval < 15 * 1000 ||typeof this.polling_interval !== 'number' || isNaN(this.polling_interval)) {
+      this.polling_interval = 30 * 1000;
     }
-    this.platform.log.debug('times: ', this.startup_time, this.polling_intervall);
+    if(this.input_delay < 150 ||typeof this.input_delay !== 'number' || isNaN(this.input_delay)) {
+      this.input_delay = 600;
+    }
+    if(this.timeout < 2 * 1000 ||typeof this.timeout !== 'number' || isNaN(this.timeout)) {
+      this.timeout = 5 * 1000;
+    }
+    this.platform.log.debug('times: ', this.startup_time, this.polling_interval, this.input_delay, this.timeout);
 
     this.platform.log.debug('inputs: ', this.inputs);
 
@@ -277,7 +286,7 @@ export class TelevisionAccessory {
       if (this.has_ambilight) {
         this.GetAmbiHue(null);
       }
-    }, this.polling_intervall);
+    }, this.polling_interval);
   }
 
 
@@ -287,7 +296,7 @@ export class TelevisionAccessory {
       headers: {
         'Content-Type': 'application/json',
       }, 
-    }, 5000, 'Timeout Error')
+    }, this.timeout, 'Timeout Error')
       .then((response) => {
         if (!response.ok) {
           throw Error(response.status);
@@ -379,7 +388,7 @@ export class TelevisionAccessory {
       headers: {
         'Content-Type': 'application/json',
       },
-    }, 5000, 'Timeout Error')
+    }, this.timeout, 'Timeout Error')
       .then((response) => {
         if (!response.ok) {
           throw Error(response.status);
@@ -458,7 +467,7 @@ export class TelevisionAccessory {
       })
         .then(response => response.text())
         .then(data => this.platform.log.debug('response: ', data))
-        .then(async () => await this.waitFor(500))
+        .then(async () => await this.waitFor(this.input_delay))
         .then(() => {
           this.platform.log.debug('finished WatchTV');
         }).catch(() => {
@@ -515,7 +524,7 @@ export class TelevisionAccessory {
         })
           .then(response => response.text())
           .then(data => this.platform.log.debug('response: ', data))
-          .then(async () => await this.waitFor(600))
+          .then(async () => await this.waitFor(this.input_delay))
           .then(() => {
             this.platform.log.debug('finished move ', move);
           }).catch(() => {
