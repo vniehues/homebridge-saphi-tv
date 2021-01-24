@@ -70,12 +70,17 @@
               "placeholder": "Input Name",
               "required": true
             },
-            "isTV": {
-              "title": "IsTV",
-              "type": "boolean",
-              "placeholder": "0-10",
-              "required": false,
-              "default" : false
+            "type": {
+              "title": "Type",
+              "type": "string",
+              "oneOf": [
+                { "title": "TV", "enum": ["TV"] },
+                { "title": "App", "enum": ["APP"] },
+                { "title": "Source", "enum": ["SOURCE"] }
+              ],
+              "required": true,
+              "default" : "TV",
+              "description" : "TV = Watch TV, App => e.g. Netflix, Source => e.g. HDMI1"
             },
             "position": {
               "title": "Position",
@@ -83,7 +88,7 @@
               "placeholder": "1",
               "required": true,
               "condition": {
-                  "functionBody": "return model.inputs[arrayIndices].isTV === false;"
+                  "functionBody": "return model.inputs[arrayIndices].type !== 'TV';"
               }
             }
           }

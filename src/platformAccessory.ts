@@ -7,6 +7,7 @@ import { SaphiTvPlatform } from './platform';
 import fetchTimeout from 'fetch-timeout';
 import wol from 'wake_on_lan';
 import { Input } from './input';
+import { InputType } from './inputType';
 
 /**
  * Platform Accessory
@@ -437,9 +438,9 @@ export class TelevisionAccessory {
 
   async SetActiveIdentifier(value: CharacteristicValue) {
     const input = this.inputs[value as number];
-    this.platform.log.debug('Setting input to: ', input.name);
+    this.platform.log.debug('Setting input to: ', input.name, input.type, InputType.App);
 
-    if (input.isTV) {
+    if (input.type as InputType === InputType.TV ) {
       await fetchTimeout(this.input_url, {
         method: 'POST',
         headers: {
@@ -462,7 +463,14 @@ export class TelevisionAccessory {
       const moves: string[] = [];
 
       // Build the moves[]
-      moves.push(JSON.stringify({ key: 'Home' }));
+      if(input.type as InputType === InputType.App) {
+        moves.push(JSON.stringify({ key: 'Home' }));
+      }
+      if(input.type as InputType === InputType.Source) {
+        moves.push(JSON.stringify({ key: 'WatchTV' }));
+        moves.push(JSON.stringify({ key: 'Source' }));
+        moves.push(JSON.stringify({ key: 'CursorDown' }));
+      }
       while (Math.abs(stepsToMake) !== 0) {
         if (stepsToMake > 0) {
           moves.push(JSON.stringify({ key: 'CursorRight' }));
@@ -489,7 +497,7 @@ export class TelevisionAccessory {
         })
           .then(response => response.text())
           .then(data => this.platform.log.debug('response: ', data))
-          .then(async () => await this.waitFor(500))
+          .then(async () => await this.waitFor(600))
           .then(() => {
             this.platform.log.debug('finished move ', move);
           }).catch(() => {
