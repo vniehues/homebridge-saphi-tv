@@ -334,7 +334,6 @@ export class TelevisionAccessory {
             }
           },
           );
-
       } else {
         await this.wolRequest(this.wol_url);
       }
@@ -416,6 +415,10 @@ export class TelevisionAccessory {
   async SetAmbiHue(value: CharacteristicValue) {
     const newPowerState = value;
     this.platform.log.debug('Setting ambihue to: ', newPowerState);
+    if(this.TvState.TvActive === false) {
+      this.platform.log.debug('Waiting for TV to turn on');
+      await this.waitFor(this.startup_time);
+    }
     if (newPowerState) {
       await fetchTimeout(this.ambihue_url, {
         method: 'POST',
@@ -439,6 +442,11 @@ export class TelevisionAccessory {
   async SetActiveIdentifier(value: CharacteristicValue) {
     const input = this.inputs[value as number];
     this.platform.log.debug('Setting input to: ', input.name, input.type, InputType.App);
+    
+    if(this.TvState.TvActive === false) {
+      this.platform.log.debug('Waiting for TV to turn on');
+      await this.waitFor(this.startup_time);
+    }
 
     if (input.type as InputType === InputType.TV ) {
       await fetchTimeout(this.input_url, {
