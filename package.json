@@ -2,15 +2,15 @@
   "private": false,
   "displayName": "SaphiTV",
   "name": "homebridge-saphi-tv",
-  "version": "0.0.3-beta.35",
-  "description": "A short description about what your plugin does.",
+  "version": "0.0.3-beta.36",
+  "description": "This plugin allows you to control your SaphiOS PhilipsTV with support for Apps, Sources and Channels as well as Ambilight, Ambilight+Hue and a CC Remote.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/USERNAME/GITHUB_PROJECT_NAME.git"
+    "url": "https://github.com/vniehues/saphi_tv.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME/issues"
+    "url": "https://github.com/vniehues/saphi_tv/issues"
   },
   "engines": {
     "node": ">=10.17.0",
@@ -45,6 +45,6 @@
     "node-fetch": "^2.6.1",
     "wake_on_lan": "^1.0.0"
   },
-  "homepage": "https://github.com/USERNAME/GITHUB_PROJECT_NAME#readme",
+  "homepage": "https://github.com/vniehues/saphi_tv#readme",
   "author": "Vincent Niehues"
 }
