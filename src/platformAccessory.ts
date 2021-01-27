@@ -18,6 +18,7 @@ export class TelevisionAccessory {
   ambihue_url: string;
   ambi_poweron: boolean;
   ambi_poweroff: boolean;
+  has_ambihue: boolean;
   has_ambilight: boolean;
   name: string;
   polling_interval: number;
@@ -117,7 +118,6 @@ export class TelevisionAccessory {
     this.wol_url = config.wol_adress as string;
     this.ambi_poweron = config.ambi_poweron as boolean;
     this.ambi_poweroff = config.ambi_poweroff as boolean;
-    this.has_ambilight = config.has_ambilight as boolean;
     this.inputs = config.inputs as [];
     this.name = config.name as string;
 
@@ -125,6 +125,14 @@ export class TelevisionAccessory {
     this.input_delay = config.input_delay as number;
     this.timeout = config.timeout as number * 1000;
     this.polling_interval = config.polling_interval as number * 1000;
+
+
+    this.has_ambihue = config.has_ambihue as boolean;
+    this.has_ambilight = config.has_ambilight as boolean;
+
+    if(this.has_ambilight === false) {
+      this.has_ambihue = false;
+    }
 
     if(this.startup_time < 5 * 1000 ||typeof this.startup_time !== 'number' || isNaN(this.startup_time)) {
       this.startup_time = 10 * 1000;
@@ -173,7 +181,7 @@ export class TelevisionAccessory {
       '/powerstate';
 
 
-    if (this.has_ambilight) {
+    if (this.has_ambihue) {
 
       this.ambihueService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
       this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
@@ -283,7 +291,7 @@ export class TelevisionAccessory {
     setInterval(() => {
       this.platform.log.debug('Triggering interval');
       this.GetActive(null);
-      if (this.has_ambilight) {
+      if (this.has_ambihue) {
         this.GetAmbiHue(null);
       }
     }, this.polling_interval);
@@ -332,7 +340,7 @@ export class TelevisionAccessory {
     this.platform.log.debug('Setting power to: ', newPowerState);
     if (newPowerState) {
 
-      if (this.has_ambilight && this.ambi_poweron) {
+      if (this.has_ambihue && this.ambi_poweron) {
 
         this.wolRequest(this.wol_url);
         await this.waitFor(this.startup_time)
@@ -348,7 +356,7 @@ export class TelevisionAccessory {
       }
     } else {
 
-      if (this.has_ambilight && this.ambi_poweroff) {
+      if (this.has_ambihue && this.ambi_poweroff) {
         await fetchTimeout(this.ambihue_url, {
           method: 'POST',
           headers: {

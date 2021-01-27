@@ -51,7 +51,7 @@
         "required": true,
         "default": true
       },
-      "ambi_poweroff": {
+      "has_ambihue": {
         "type": "boolean",
         "required": true,
         "default": true,
@@ -59,12 +59,20 @@
           "functionBody": "return model.has_ambilight === true;"
         }
       },
+      "ambi_poweroff": {
+        "type": "boolean",
+        "required": true,
+        "default": true,
+        "condition": {
+          "functionBody": "return (model.has_ambilight === true && model.has_ambihue === true);"
+        }
+      },
       "ambi_poweron": {
         "type": "boolean",
         "required": true,
         "default": false,
         "condition": {
-          "functionBody": "return model.has_ambilight === true;"
+          "functionBody": "return (model.has_ambilight === true && model.has_ambihue === true);"
         }
       },
       "inputs": {
@@ -134,7 +142,7 @@
       "notitle": false
     },
     {
-      "type": "section",
+      "type": "fieldset",
       "title": "Local Network",
       "expandable": true,
       "expanded": true,
@@ -161,7 +169,7 @@
       ]
     },
     {
-      "type": "section",
+      "type": "fieldset",
       "title": "Capabilities",
       "expandable": true,
       "expanded": false,
@@ -172,6 +180,12 @@
           "items": [
             {
               "key": "has_ambilight",
+              "title": "TV has Ambilight",
+              "description": "Checking this will allow you to control your TVs Ambilight",
+              "notitle": false
+            },
+            {
+              "key": "has_ambihue",
               "title": "Ambilight + Hue support",
               "description": "Checking this will add a switch to your TV to control the Ambilight+Hue option.",
               "notitle": false
@@ -193,7 +207,7 @@
       ]
     },
     {
-      "type": "section",
+      "type": "fieldset",
       "title": "Timings",
       "expandable": true,
       "expanded": false,
@@ -232,7 +246,7 @@
       ]
     },
     {
-      "type": "section",
+      "type": "fieldset",
       "title": "Inputs",
       "expandable": true,
       "expanded": false,
@@ -251,21 +265,21 @@
               "items": [
                 {
                   "key": "inputs[].type",
-                  "flex": "2 1 40px",
+                  "flex": "1 1 50px",
                   "notitle": false,
-                  "placeholder": "Type"
+                  "placeholder": "Position"
                 },
                 {
                   "key": "inputs[].name",
-                  "flex": "3 3 200px",
+                  "flex": "2 2 200px",
                   "notitle": false,
                   "placeholder": "Name"
                 },
                 {
                   "key": "inputs[].position",
-                  "flex": "1 2 40px",
+                  "flex": "1 1 50px",
                   "notitle": false,
-                  "placeholder": "Position"
+                  "placeholder": "Type"
                 }
               ]
             }
