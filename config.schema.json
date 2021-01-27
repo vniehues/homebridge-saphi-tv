@@ -267,7 +267,7 @@
                   "key": "inputs[].type",
                   "flex": "1 1 50px",
                   "notitle": false,
-                  "placeholder": "Position"
+                  "placeholder": "Type"
                 },
                 {
                   "key": "inputs[].name",
@@ -279,7 +279,7 @@
                   "key": "inputs[].position",
                   "flex": "1 1 50px",
                   "notitle": false,
-                  "placeholder": "Type"
+                  "placeholder": "Position"
                 }
               ]
             }
