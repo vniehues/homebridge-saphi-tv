@@ -23,7 +23,7 @@
         "minimum": 10,
         "maximum": 30,
         "required": true,
-        "default": 10
+        "default": 15
       },
       "timeout": {
         "type": "integer",
@@ -37,14 +37,47 @@
         "minimum": 150,
         "maximum": 1500,
         "required": true,
-        "default": 600
+        "default": 650
+      },
+      "api_version": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 6,
+        "required": true,
+        "default": 6
+      },
+      "api_port_no": {
+        "type": "number",
+        "required": true,
+        "default": 1921,
+        "minimum": 0,
+        "maximum": 9999
+      },
+      "protocol": {
+        "type": "string",
+        "oneOf": [
+          {
+            "title": "HTTP",
+            "enum": [
+              "http"
+            ]
+          },
+          {
+            "title": "HTTPS",
+            "enum": [
+              "https"
+            ]
+          }
+        ],
+        "required": true,
+        "default": "http"
       },
       "polling_interval": {
         "type": "integer",
         "minimum": 15,
         "maximum": 120,
         "required": true,
-        "default": 30
+        "default": 40
       },
       "has_ambilight": {
         "type": "boolean",
@@ -82,13 +115,11 @@
           "type": "object",
           "properties": {
             "name": {
-              "title": "Name",
               "type": "string",
               "placeholder": "Input Name",
               "required": true
             },
             "type": {
-              "title": "Type",
               "type": "string",
               "oneOf": [
                 {
@@ -120,7 +151,6 @@
               "default": "TV"
             },
             "position": {
-              "title": "Position",
               "type": "number",
               "placeholder": "1",
               "required": true,
@@ -144,8 +174,9 @@
     {
       "type": "fieldset",
       "title": "Local Network",
+      "description": "Where can I reach your TV?",
       "expandable": true,
-      "expanded": true,
+      "expanded": false,
       "items": [
         {
           "type": "flex",
@@ -154,15 +185,16 @@
             {
               "title": "IP Adress",
               "key": "ip_adress",
-              "description": "IP adress of your TV",
-              "notitle": false
+              "placeholder": "192.168.78.98",
+              "notitle": false,
+              "description": "IP adress of your TV"
             },
             {
               "title": "WOL Adress",
               "key": "wol_adress",
               "notitle": false,
               "placeholder": "wol://20:DE:20:DE:20:DE",
-              "description": "WOL adress of your TV (mac-adress)"
+              "description": "wol adress of your TV (mac adress)"
             }
           ]
         }
@@ -171,6 +203,7 @@
     {
       "type": "fieldset",
       "title": "Capabilities",
+      "description": "This controls, what the plugin will do for you.",
       "expandable": true,
       "expanded": false,
       "items": [
@@ -200,46 +233,7 @@
               "key": "ambi_poweroff",
               "notitle": false,
               "title": "Turn off Ambilight+ before turning off the TV",
-              "description": "This will turn off Ambilight+Hue before turning off your TV as a workaround for a know Ambilight+Hue bug where you would get a significant delay"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "fieldset",
-      "title": "Timings",
-      "expandable": true,
-      "expanded": false,
-      "items": [
-        {
-          "type": "flex",
-          "flex-flow": "column",
-          "items": [
-            {
-              "key": "startup_time",
-              "notitle": false,
-              "description": "Approximate time your TV takes to start.",
-              "title": "Startup time"
-            },
-            {
-              "key": "input_delay",
-              "title": "Delay between inputs (ms)",
-              "description": "This changes how long the plugin waits between 'key-presses' when commanding your TV. Lower values make it feel more snappy but if it's too low, your TV might not be fast enough or shut down it's API.",
-              "notitle": false
-            },
-            {
-              "key": "polling_interval",
-
-        "title": "Polling Interval (s)",
-        "description": "How often the TV state is updated in the background",
-              "notitle": false
-            },
-            {
-              "title": "Timeout time",
-              "description": "This changes how long the plugin waits for answers from your tv. Higher values give your TV more time to respond in case of a bad connection but if it's too high, homekit might return early with a 'No Respone'.",
-              "key": "timeout",
-              "notitle": false
+              "description": "This will turn off Ambilight+Hue before turning off your TV as a workaround for a known Ambilight+Hue bug where you would get a significant delay"
             }
           ]
         }
@@ -248,11 +242,17 @@
     {
       "type": "fieldset",
       "title": "Inputs",
+      "description": "This allows you to add 'inputs' to your TV.",
       "expandable": true,
       "expanded": false,
       "items": [
         {
-          "description": "This allows you to add 'inputs' to your TV. TV only sends the 'Watch TV' key. Channel will send the 'Watch TV' key and then input the channel you specified. App will open an App from your 'home' bar (e.g. Netflix). Source will select one of your input sources (e.g. HDMI1). Appmode: the position of your app relative to the cursor position when you open the 'home' bar (negative numbers go left, positive numbers go right, 0 immediately confirms). Sourcemode: the position of your app relative to the cursor position when you open the 'sources' bar (negative numbers go left, positive numbers go right, 0 immediately confirms).  Channelmode: the Channel you want to watch. ",
+          "title": "Help",
+          "notitle": true,
+          "type": "help",
+          "helpvalue": "<p> <b>TV</b> only activates WatchTV. <br> <b>App</b> opens an app from your home-bar. <br> <b>Source</b> changes the TVs current input. <br> <b>Channel</b> selects the given channel number.</p>"
+        },
+        {
           "key": "inputs",
           "title": "Input",
           "notitle": true,
@@ -265,21 +265,108 @@
               "items": [
                 {
                   "key": "inputs[].type",
+                  "title": "Type",
                   "flex": "1 1 50px",
                   "notitle": false,
                   "placeholder": "Type"
                 },
                 {
                   "key": "inputs[].name",
+                  "title": "Input name",
                   "flex": "2 2 200px",
                   "notitle": false,
-                  "placeholder": "Name"
+                  "placeholder": "Input name"
                 },
                 {
                   "key": "inputs[].position",
                   "flex": "1 1 50px",
                   "notitle": false,
+                  "title": "Position",
                   "placeholder": "Position"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fieldset",
+      "title": "Advanced",
+      "description": "These settings should be OK by default but I wanted to still give you control over them.",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "tabarray",
+          "items": [
+            {
+              "type": "section",
+              "title": "Timings",
+              "notitle": true,
+              "expandable": false,
+              "description": "This allows you to change the timings of this plugin. Please only change these if you need to.",
+              "expanded": true,
+              "items": [
+                {
+                  "type": "flex",
+                  "flex-flow": "column",
+                  "items": [
+                    {
+                      "key": "startup_time",
+                      "notitle": false,
+                      "description": "the time your TV takes for a full start-up",
+                      "title": "Startup time (s)"
+                    },
+                    {
+                      "key": "input_delay",
+                      "title": "Delay between inputs (ms)",
+                      "description": "the time between commands. lower feels snapier but it might confuse your TV.",
+                      "notitle": false
+                    },
+                    {
+                      "key": "polling_interval",
+                      "title": "Polling Interval (s)",
+                      "description": "How often the TV state is updated in the background",
+                      "notitle": false
+                    },
+                    {
+                      "title": "Timeout time (s)",
+                      "description": "how long to wait for a response from your TV before declaring it off. Higher values might make HomeKit go 'No Response'",
+                      "key": "timeout",
+                      "notitle": false
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "title": "Saphi API",
+              "notitle": true,
+              "expandable": false,
+              "description": "This allows you to change the timings of this plugin. Please only change these if you need to.",
+              "expanded": true,
+              "items": [
+                {
+                  "key": "api_version",
+                  "title": "API version",
+                  "placeholder": "6",
+                  "description": "the Saphi-API version your TV is running",
+                  "notitle": false
+                },
+                {
+                  "key": "api_port_no",
+                  "title": "API port",
+                  "placeholder": "1925",
+                  "description": "the Saphi-API port your TV is running",
+                  "notitle": false
+                },
+                {
+                  "key": "protocol",
+                  "title": "API protocol",
+                  "description": "the Saphi-API protocol your TV is running",
+                  "notitle": false
                 }
               ]
             }

@@ -88,15 +88,14 @@ export class TelevisionAccessory {
   input_url: string;
 
   protocol = 'http';
+  port_no = 1925;
+  api_version = 6;
 
   ip_address: string;
 
   startup_time: number;
   public readonly inputs: Input[] = [];
 
-  portNo = 1925;
-
-  api_version = 6;
 
   power_on_body = { powerstate: 'On' };
   power_off_body = { powerstate: 'Standby' };
@@ -126,6 +125,9 @@ export class TelevisionAccessory {
     this.timeout = config.timeout as number * 1000;
     this.polling_interval = config.polling_interval as number * 1000;
 
+    this.protocol = config.protocol as string;
+    this.api_version = config.api_version as number;
+    this.port_no = config.api_port_no as number;
 
     this.has_ambihue = config.has_ambihue as boolean;
     this.has_ambilight = config.has_ambilight as boolean;
@@ -137,25 +139,25 @@ export class TelevisionAccessory {
     if(this.startup_time < 5 * 1000 ||typeof this.startup_time !== 'number' || isNaN(this.startup_time)) {
       this.startup_time = 10 * 1000;
     }
+
     if(this.polling_interval < 15 * 1000 ||typeof this.polling_interval !== 'number' || isNaN(this.polling_interval)) {
       this.polling_interval = 30 * 1000;
     }
+
     if(this.input_delay < 150 ||typeof this.input_delay !== 'number' || isNaN(this.input_delay)) {
       this.input_delay = 600;
     }
+
     if(this.timeout < 2 * 1000 ||typeof this.timeout !== 'number' || isNaN(this.timeout)) {
       this.timeout = 5 * 1000;
     }
-    this.platform.log.debug('times: ', this.startup_time, this.polling_interval, this.input_delay, this.timeout);
-
-    this.platform.log.debug('inputs: ', this.inputs);
 
     this.input_url =
       this.protocol +
       '://' +
       this.ip_address +
       ':' +
-      this.portNo +
+      this.port_no +
       '/' +
       this.api_version +
       '/input/key';
@@ -165,7 +167,7 @@ export class TelevisionAccessory {
       '://' +
       this.ip_address +
       ':' +
-      this.portNo +
+      this.port_no +
       '/' +
       this.api_version +
       '/HueLamp/power';
@@ -175,11 +177,16 @@ export class TelevisionAccessory {
       '://' +
       this.ip_address +
       ':' +
-      this.portNo +
+      this.port_no +
       '/' +
       this.api_version +
       '/powerstate';
 
+    this.platform.log.debug('times: ', this.startup_time, this.polling_interval, this.input_delay, this.timeout);
+    this.platform.log.debug('inputs: ', this.inputs);
+    this.platform.log.debug('powerURL: ', this.power_url);
+    this.platform.log.debug('inputURL: ', this.input_url);
+    this.platform.log.debug('ambihueURL: ', this.ambihue_url);
 
     if (this.has_ambihue) {
 
