@@ -47,5 +47,9 @@
     "wake_on_lan": "^1.0.0"
   },
   "homepage": "https://github.com/vniehues/saphi_tv#readme",
-  "author": "Vincent Niehues"
+  "author": "Vincent Niehues",
+  "funding": {
+    "type" : "paypal",
+    "url" : "https://paypal.me/vniehues"
+  }
 }
