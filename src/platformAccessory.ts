@@ -311,12 +311,12 @@ export class TelevisionAccessory {
         this.GetAmbiHue(null);
       }
     }, this.polling_interval);
-    
+
     myHeartPing.start(
       this.ip_address,
       80,
-      (time) => {
-        this.platform.log.debug('Successfully pinged your TV. It took ${0} milliseconds.', time);
+      () => {
+        this.platform.log.debug('Successfully pinged your TV.');
       },
       () => {
         this.platform.log.debug('Failed to ping your TV');
