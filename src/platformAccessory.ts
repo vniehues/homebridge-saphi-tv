@@ -208,7 +208,7 @@ export class TelevisionAccessory {
 
 
     // get/set the service
-    this.tvService = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
+    this.tvService = this.accessory.addService(this.platform.Service.Television, 'ActiveInput');
 
     if (this.inputs && this.inputs.length > 0) {
       this.inputs.forEach((input: Input, index) => {
@@ -223,7 +223,7 @@ export class TelevisionAccessory {
         this.tvService.addLinkedService(inputService);
 
         if(input.exposeAsSwitch === true) {
-          const switchService = this.accessory.addService(this.platform.Service.Switch, 'input' + input.position, input.name);
+          const switchService = this.accessory.addService(this.platform.Service.Switch, 'switchInput' + input.position, input.name);
           switchService
             .setCharacteristic(this.platform.Characteristic.Name, input.name)
             .getCharacteristic(this.platform.Characteristic.On)
@@ -268,7 +268,7 @@ export class TelevisionAccessory {
         this.platform.log.info('Get Active');
       });
 
-    this.tvService.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, 1);
+    this.tvService.setCharacteristic(this.platform.Characteristic.ActiveIdentifier, 0);
 
     // handle input source changes
     this.tvService.getCharacteristic(this.platform.Characteristic.ActiveIdentifier)
