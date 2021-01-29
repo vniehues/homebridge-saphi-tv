@@ -228,6 +228,19 @@ export class TelevisionAccessory {
           .setCharacteristic(this.platform.Characteristic.InputSourceType, this.platform.Characteristic.InputSourceType.APPLICATION);
 
         this.tvService.addLinkedService(inputService);
+
+        if(input.exposeAsSwitch === true) {
+          const switchService = this.accessory.addService(this.platform.Service.StatelessProgrammableSwitch, 'input' + input.position, input.name);
+          switchService
+            .setCharacteristic(this.platform.Characteristic.Name, input.name)
+            .getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent)
+            .on('get', (newValue, callback) => {
+              callback(null);
+              if(newValue === true) {
+                this.SetActiveIdentifier(index);
+              }
+            });
+        }
       });
     }
 

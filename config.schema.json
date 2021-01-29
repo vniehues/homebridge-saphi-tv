@@ -119,6 +119,10 @@
               "placeholder": "Input Name",
               "required": true
             },
+            "exposeAsSwitch": {
+              "type": "boolean",
+              "required": false
+            },
             "type": {
               "type": "string",
               "oneOf": [
@@ -283,6 +287,12 @@
                   "notitle": false,
                   "title": "Position",
                   "placeholder": "Position"
+                },
+                {
+                  "key": "inputs[].exposeAsSwitch",
+                  "title": "Expose as switch",
+                  "flex": "1 3 50px",
+                  "notitle": false
                 }
               ]
             }

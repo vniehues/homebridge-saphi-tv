@@ -5,4 +5,5 @@ export class Input{
     public position = 0;
     public isTV = false;
     public type = InputType.TV;
+    public exposeAsSwitch = false;
 }
