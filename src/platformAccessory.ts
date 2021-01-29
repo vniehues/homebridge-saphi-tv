@@ -428,6 +428,12 @@ export class TelevisionAccessory {
         });
       }
     }
+
+    await this.waitFor(1000).then(() => {
+      this.GetActive(null);
+    }).catch(() => {
+      this.platform.log.debug('Turned on TV but failed to get powerstate.');
+    });
   }
 
   async GetAmbiHue(callback) {
@@ -493,6 +499,11 @@ export class TelevisionAccessory {
         body: JSON.stringify(this.ambihue_off_body),
       });
     }
+    await this.waitFor(1000).then(() => {
+      this.GetAmbiHue(null);
+    }).catch(() => {
+      this.platform.log.debug('Turned on Ambihue but failed to get state.');
+    });
   }
 
 

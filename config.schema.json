@@ -254,7 +254,7 @@
           "title": "Help",
           "notitle": true,
           "type": "help",
-          "helpvalue": "<p> <b>TV</b> only activates WatchTV. <br> <b>App</b> opens an app from your home-bar. <br> <b>Source</b> changes the TVs current input. <br> <b>Channel</b> selects the given channel number.</p>"
+          "helpvalue": "<p> <b>TV</b> only activates WatchTV. <br> <b>App</b> opens an app from your home-bar. <br> <b>Source</b> changes the TVs current input. <br> <b>Channel</b> selects the given channel number.<br> <b>Switch</b> will allow Siri to activate the input. This <b>will</b> clutter your HomeKit! </p>"
         },
         {
           "key": "inputs",
@@ -290,7 +290,7 @@
                 },
                 {
                   "key": "inputs[].exposeAsSwitch",
-                  "title": "Expose as switch",
+                  "title": "Switch",
                   "flex": "1 3 50px",
                   "notitle": false
                 }
