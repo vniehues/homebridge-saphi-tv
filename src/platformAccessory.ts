@@ -199,7 +199,7 @@ export class TelevisionAccessory {
 
     if (this.has_ambihue) {
 
-      this.ambihueService = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+      this.ambihueService = this.accessory.addService(this.platform.Service.Switch, 'Ambilight Plus');
       this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
         .on('get', (callback) => {
           this.GetAmbiHue(callback);
@@ -238,6 +238,7 @@ export class TelevisionAccessory {
               callback(null);
               if(newValue === true) {
                 this.SetActiveIdentifier(index);
+                switchService.updateCharacteristic(this.platform.Characteristic.On, false);
               }
             });
         }
@@ -428,12 +429,6 @@ export class TelevisionAccessory {
         });
       }
     }
-
-    await this.waitFor(1000).then(() => {
-      this.GetActive(null);
-    }).catch(() => {
-      this.platform.log.debug('Turned on TV but failed to get powerstate.');
-    });
   }
 
   async GetAmbiHue(callback) {
@@ -499,11 +494,6 @@ export class TelevisionAccessory {
         body: JSON.stringify(this.ambihue_off_body),
       });
     }
-    await this.waitFor(1000).then(() => {
-      this.GetAmbiHue(null);
-    }).catch(() => {
-      this.platform.log.debug('Turned on Ambihue but failed to get state.');
-    });
   }
 
 
