@@ -2,7 +2,7 @@
   "private": false,
   "displayName": "Homebridge Philips TV Saphi-OS",
   "name": "homebridge-saphi-tv",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "This plugin allows you to control your SaphiOS PhilipsTV with support for Apps, Sources and Channels as well as Ambilight, Ambilight+Hue and a CC Remote.",
   "license": "Apache-2.0",
   "repository": {
