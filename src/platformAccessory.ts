@@ -230,11 +230,11 @@ export class TelevisionAccessory {
         this.tvService.addLinkedService(inputService);
 
         if(input.exposeAsSwitch === true) {
-          const switchService = this.accessory.addService(this.platform.Service.StatelessProgrammableSwitch, 'input' + input.position, input.name);
+          const switchService = this.accessory.addService(this.platform.Service.Switch, 'input' + input.position, input.name);
           switchService
             .setCharacteristic(this.platform.Characteristic.Name, input.name)
-            .getCharacteristic(this.platform.Characteristic.ProgrammableSwitchEvent)
-            .on('get', (newValue, callback) => {
+            .getCharacteristic(this.platform.Characteristic.On)
+            .on('set', (newValue, callback) => {
               callback(null);
               if(newValue === true) {
                 this.SetActiveIdentifier(index);
