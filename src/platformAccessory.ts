@@ -5,7 +5,7 @@ import { Service, PlatformAccessory, PlatformConfig, Categories, CharacteristicV
 import { SaphiTvPlatform } from './platform';
 
 import fetchTimeout from 'fetch-timeout';
-import wol from 'wake_on_lan';
+import wol, {WakeOptions} from 'wake_on_lan';
 import ping from 'ping';
 
 import { Input } from './input';
@@ -42,7 +42,11 @@ export class TelevisionAccessory {
         //Wake on lan request
         const macAddress = url.replace(/^WOL[:]?[/]?[/]?/gi, '');
         this.platform.log.debug('Executing WakeOnLan request to ' + macAddress);
-        wol.wake(macAddress, 10, 50, (error) => {
+
+        const options = new WakeOptions();
+        options.num_packets = 10;
+
+        wol.wake(macAddress, options, (error) => {
           if (error) {
             this.platform.log.warn('WOL-Error: ', error);
           } else {
