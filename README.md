@@ -1,7 +1,7 @@
 
 <p align="center">
 
-<img src="https://github.com/homebridge/branding/raw/master/logos/homebridge-wordmark-logo-vertical.png" width="150">
+<img src="https://github.com/homebridge/branding/raw/master/logos/homebridge-wordmark-logo-horizontal.png" width="250">
 
 </p>
 
@@ -30,6 +30,7 @@ Working:
   - volume control with hardware buttons 
   - Options
 - Input functions (Configurable via config)
+    - also exposable as switches for easy siri control
   - Watch TV Button
   - Applications
   - Input sources
@@ -40,6 +41,8 @@ What's next?
 - Ambilight brightness
 - Ambilight modes
 - Ambilight+Hue modes
+- Look into volume control with a slider
+- arrangements within the home app
 
 Some whishful thinking:
 - Auto detect the TV in your local network
