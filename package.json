@@ -42,8 +42,8 @@
   },
   "dependencies": {
     "fetch-timeout": "0.0.2",
-    "heart-ping": "^1.0.13",
     "node-fetch": "^2.6.1",
+    "ping": "^0.4.0",
     "wake_on_lan": "^1.0.0"
   },
   "homepage": "https://github.com/vniehues/saphi_tv#readme",
