@@ -43,7 +43,7 @@ export class TelevisionAccessory {
         const macAddress = url.replace(/^WOL[:]?[/]?[/]?/gi, '');
         this.platform.log.debug('Executing WakeOnLan request to ' + macAddress);
 
-        wol.wake(macAddress, {num_packets: 10}, (error) => {
+        wol.wake(macAddress, {num_packets: 20}, (error) => {
           if (error) {
             this.platform.log.warn('WOL-Error: ', error);
           } else {
