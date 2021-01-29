@@ -5,7 +5,7 @@ import { Service, PlatformAccessory, PlatformConfig, Categories, CharacteristicV
 import { SaphiTvPlatform } from './platform';
 
 import fetchTimeout from 'fetch-timeout';
-import wol, {WakeOptions} from 'wake_on_lan';
+import wol from 'wake_on_lan';
 import ping from 'ping';
 
 import { Input } from './input';
@@ -356,6 +356,9 @@ export class TelevisionAccessory {
         if (error.response && error.response.status !== 200) {
           this.TvState.TvActive = false;
         }
+        if(error.code === 'EHOSTUNREACH') {
+          this.TvState.TvActive = false;
+        }
         this.platform.log.debug('Error getPowerState : ', error);
       })
       .finally(() => {
@@ -446,6 +449,9 @@ export class TelevisionAccessory {
       })
       .catch(error => {
         if (error.response && error.response.status !== 200) {
+          this.TvState.AmbiHueActive = false;
+        }
+        if(error.code === 'EHOSTUNREACH') {
           this.TvState.AmbiHueActive = false;
         }
         this.platform.log.debug('Error getAmbihueState : ', error);
