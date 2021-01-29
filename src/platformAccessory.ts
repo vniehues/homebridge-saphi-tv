@@ -6,7 +6,7 @@ import { SaphiTvPlatform } from './platform';
 
 import fetchTimeout from 'fetch-timeout';
 import wol from 'wake_on_lan';
-import HeartPing from 'heart-ping';
+import ping from 'ping';
 
 import { Input } from './input';
 import { InputType } from './inputType';
@@ -190,15 +190,7 @@ export class TelevisionAccessory {
     this.platform.log.debug('inputURL: ', this.input_url);
     this.platform.log.debug('ambihueURL: ', this.ambihue_url);
 
-    const myHeartPing = new HeartPing();
-    myHeartPing.setBeatInterval(this.polling_interval);
-    myHeartPing.setBeatTimeout(this.timeout * 2);
-    myHeartPing.setOnTimeout(() => {
-      this.platform.log.debug('Your TV does not respond at all!');
-    });
-
     if (this.has_ambihue) {
-
       this.ambihueService = this.accessory.addService(this.platform.Service.Switch, 'Ambilight Plus');
       this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
         .on('get', (callback) => {
@@ -237,6 +229,9 @@ export class TelevisionAccessory {
             .on('set', (newValue, callback) => {
               callback(null);
               if(newValue === true) {
+                if(this.TvState.TvActive === false) {
+                  this.SetActive(this.platform.Characteristic.Active.ACTIVE);
+                }
                 this.SetActiveIdentifier(index);
                 switchService.updateCharacteristic(this.platform.Characteristic.On, false);
               }
@@ -320,22 +315,17 @@ export class TelevisionAccessory {
 
     setInterval(() => {
       this.platform.log.debug('Triggering interval');
+      
+      ping.sys.probe(this.ip_address, (isAlive)=> {
+        const msg = isAlive ? 'TV is alive' : 'TV is dead';
+        this.platform.log.debug(msg);
+      });
+
       this.GetActive(null);
       if (this.has_ambihue) {
         this.GetAmbiHue(null);
       }
     }, this.polling_interval);
-
-    myHeartPing.start(
-      this.ip_address,
-      80,
-      () => {
-        this.platform.log.debug('Successfully pinged your TV.');
-      },
-      () => {
-        this.platform.log.debug('Failed to ping your TV');
-      },
-    );
   }
 
 
