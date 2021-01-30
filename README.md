@@ -68,6 +68,7 @@ Some whishful thinking:
             "polling_interval": 30,
             "has_ambilight": true,
             "has_ambihue": true,
+            "has_tv_channels": true,
             "ambi_poweroff": false,
             "ambi_poweron": false,
             "inputs": [
