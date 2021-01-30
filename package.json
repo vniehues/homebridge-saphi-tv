@@ -43,13 +43,14 @@
   "dependencies": {
     "fetch-timeout": "0.0.2",
     "node-fetch": "^2.6.1",
+    "np": "^7.2.0",
     "ping": "^0.4.0",
     "wake_on_lan": "^1.0.0"
   },
   "homepage": "https://github.com/vniehues/saphi_tv#readme",
   "author": "Vincent Niehues",
   "funding": {
-    "type" : "paypal",
-    "url" : "https://paypal.me/vniehues/EUR"
+    "type": "paypal",
+    "url": "https://paypal.me/vniehues/EUR"
   }
 }

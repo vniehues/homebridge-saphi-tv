@@ -18,6 +18,11 @@
         "type": "string",
         "required": true
       },
+      "has_tv_channels": {
+        "type": "boolean",
+        "required": false,
+        "default": true
+      },
       "startup_time": {
         "type": "integer",
         "minimum": 10,
