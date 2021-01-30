@@ -384,6 +384,22 @@
                   "notitle": false
                 }
               ]
+            },
+            {
+              "type": "section",
+              "title": "TV Settings",
+              "notitle": true,
+              "expandable": false,
+              "description": "This allows you to change some settings about your TV",
+              "expanded": true,
+              "items": [
+                {
+                  "key": "has_tv_channels",
+                  "title": "Has TV channels set up",
+                  "description": "Uncheck if you did NOT set up your TV with TV Channels.",
+                  "notitle": false
+                }
+              ]
             }
           ]
         }
