@@ -12,7 +12,9 @@ This plug-in provides Homebridge support for Philips TVs running SaphiOS.
 
 ## Info
 
-Plug-in tested on 55PUS6704 ( API 6.0.0 )
+Plug-in tested on 
+- 55PUS6704 (API 6.1.0 )
+- 65OLED754 (API 6.1.0 )
 
 Working:
 
