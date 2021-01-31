@@ -584,7 +584,7 @@ export class TelevisionAccessory {
             this.platform.log.debug('could not finish move ', move);
           });
 
-          if(move == JSON.stringify({ key: 'WatchTV' }))
+          if(move === JSON.stringify({ key: 'WatchTV' }))
           {
             if(this.has_no_channels === true)
             {
