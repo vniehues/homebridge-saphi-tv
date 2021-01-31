@@ -1,4 +1,6 @@
-import { API, APIEvent, Logger, PlatformAccessory, PlatformAccessoryEvent, PlatformConfig, Service, Characteristic, DynamicPlatformPlugin } from 'homebridge';
+import {
+API, APIEvent, Logger, PlatformAccessory, PlatformAccessoryEvent, PlatformConfig, Service, Characteristic, DynamicPlatformPlugin
+} from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { TelevisionAccessory } from './platformAccessory';
@@ -32,7 +34,7 @@ export class SaphiTvPlatform implements DynamicPlatformPlugin {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
     accessory.on(PlatformAccessoryEvent.IDENTIFY, () => {
-      this.log.info("%s identified", accessory.displayName);
+      this.log.info('%s identified', accessory.displayName);
     });
 
     this.accessories.push(accessory);
@@ -48,12 +50,12 @@ export class SaphiTvPlatform implements DynamicPlatformPlugin {
     const uuidRemote = this.api.hap.uuid.generate(PLUGIN_NAME + tvName + 'Remote');
     const remoteAccessory = new this.api.platformAccessory(tvName + 'Remote', uuidRemote);
 
-    new TelevisionAccessory(this, tvAccessory,remoteAccessory, this.config);
+    new TelevisionAccessory(this, tvAccessory, remoteAccessory, this.config);
     this.api.publishExternalAccessories(PLUGIN_NAME, [tvAccessory]);
     this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [remoteAccessory]);
   }
 
-  removeAllAccessories(){
+  removeAllAccessories() {
     this.log.info('removing all accessories');
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, this.accessories);
     this.accessories.splice(0, this.accessories.length);
