@@ -115,7 +115,8 @@ export class TelevisionAccessory {
 
   constructor(
     private readonly platform: SaphiTvPlatform,
-    private readonly accessory: PlatformAccessory,
+    private readonly tvAccessory: PlatformAccessory,
+    private readonly remoteAccessory: PlatformAccessory,
     public readonly config: PlatformConfig,
   ) {
     this.ip_address = config.ip_adress as string;
@@ -197,7 +198,7 @@ export class TelevisionAccessory {
     this.platform.log.debug('ambihueURL: ', this.ambihue_url);
 
     if (this.has_ambihue) {
-      this.ambihueService = this.accessory.addService(this.platform.Service.Switch, 'Ambilight Plus');
+      this.ambihueService = this.tvAccessory.addService(this.platform.Service.Switch, 'Ambilight Plus');
       this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
         .on('get', (callback) => {
           this.GetAmbiHue(callback);
@@ -213,11 +214,11 @@ export class TelevisionAccessory {
 
 
     // get/set the service
-    this.tvService = this.accessory.addService(this.platform.Service.Television, 'ActiveInput');
+    this.tvService = this.tvAccessory.addService(this.platform.Service.Television, 'ActiveInput');
 
     if (this.inputs && this.inputs.length > 0) {
       this.inputs.forEach((input: Input, index) => {
-        const inputService = this.accessory.addService(this.platform.Service.InputSource, 'input' + input.position, input.name);
+        const inputService = this.tvAccessory.addService(this.platform.Service.InputSource, 'input' + input.position, input.name);
         inputService
           .setCharacteristic(this.platform.Characteristic.ConfiguredName, input.name)
           .setCharacteristic(this.platform.Characteristic.Identifier, index)
@@ -228,7 +229,7 @@ export class TelevisionAccessory {
         this.tvService.addLinkedService(inputService);
 
         if (input.exposeAsSwitch === true) {
-          const switchService = this.accessory.addService(this.platform.Service.Switch, 'switchInput' + input.position, input.name);
+          const switchService = this.remoteAccessory.addService(this.platform.Service.Switch, 'switchInput' + input.position, input.name);
           switchService
             .setCharacteristic(this.platform.Characteristic.Name, input.name)
             .getCharacteristic(this.platform.Characteristic.On)
@@ -248,8 +249,8 @@ export class TelevisionAccessory {
 
 
     // set accessory information
-    this.accessory.category = Categories.TELEVISION;
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
+    this.tvAccessory.category = Categories.TELEVISION;
+    this.tvAccessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Default-Manufacturer')
       .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
@@ -291,7 +292,7 @@ export class TelevisionAccessory {
         this.platform.log.info('Sending RemoteInput: ' + newValue);
       });
 
-    const speakerService = this.accessory.addService(
+    const speakerService = this.tvAccessory.addService(
       this.platform.Service.TelevisionSpeaker,
     );
 
@@ -381,7 +382,6 @@ export class TelevisionAccessory {
     if (newPowerState) {
 
       if (this.has_ambihue && this.ambi_poweron) {
-
         this.wolRequest(this.wol_url);
         await this.waitFor(this.startup_time)
           .then(() => {
@@ -395,7 +395,6 @@ export class TelevisionAccessory {
         await this.wolRequest(this.wol_url);
       }
     } else {
-
       if (this.has_ambihue && this.ambi_poweroff) {
         await fetchTimeout(this.ambihue_url, {
           method: 'POST',
