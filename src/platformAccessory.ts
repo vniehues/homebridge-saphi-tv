@@ -405,7 +405,7 @@ export class TelevisionAccessory {
           body: JSON.stringify(this.ambihue_off_body),
         }).then(
           async () => {
-            await this.waitFor(2500)
+            await this.waitFor(this.input_delay)
               .then(async () => {
                 await fetchTimeout(this.input_url, {
                   method: 'POST', // or 'PUT'
@@ -584,10 +584,13 @@ export class TelevisionAccessory {
             this.platform.log.debug('could not finish move ', move);
           });
 
+        // Aditional delays because WatchTV takes time to load and even more if there are no channels installed.
         if (move === JSON.stringify({ key: 'WatchTV' })) {
           if (this.has_no_channels === true) {
             this.platform.log.debug('waiting ' + this.channel_setup_popup_time + ' ms for channel popup');
             await this.waitFor(this.channel_setup_popup_time);
+          } else {
+            await this.waitFor(this.input_delay);
           }
         }
       }
