@@ -26,7 +26,7 @@ export class TelevisionAccessory {
   polling_interval: number;
   input_delay: number;
   timeout: number;
-  has_tv_channels: boolean;
+  has_no_channels: boolean;
 
   waitFor(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -133,7 +133,7 @@ export class TelevisionAccessory {
     this.api_version = config.api_version as number;
     this.port_no = config.api_port_no as number;
     
-    this.has_tv_channels = config.has_tv_channels as boolean;
+    this.has_no_channels = !config.has_tv_channels as boolean;
 
     this.has_ambihue = config.has_ambihue as boolean;
     this.has_ambilight = config.has_ambilight as boolean;
@@ -535,7 +535,7 @@ export class TelevisionAccessory {
       if(input.type as InputType === InputType.Source) {
         moves.push(JSON.stringify({ key: 'WatchTV' }));
         
-        if(this.has_tv_channels === false) {
+        if(this.has_no_channels === true) {
           moves.push(JSON.stringify({ key: 'CursorRight' }));
           moves.push(JSON.stringify({ key: 'Confirm' }));
         } else {

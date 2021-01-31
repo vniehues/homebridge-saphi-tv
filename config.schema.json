@@ -20,7 +20,7 @@
       },
       "has_tv_channels": {
         "type": "boolean",
-        "required": false,
+        "required": true,
         "default": true
       },
       "startup_time": {
