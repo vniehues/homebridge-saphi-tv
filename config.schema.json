@@ -23,6 +23,16 @@
         "required": true,
         "default": true
       },
+      "channel_setup_popup_time": {
+        "type": "integer",
+        "minimum": 100,
+        "maximum": 10000,
+        "required": true,
+        "default": 2250,
+        "condition": {
+          "functionBody": "return model.has_tv_channels === false;"
+        }
+      },
       "startup_time": {
         "type": "integer",
         "minimum": 10,
@@ -397,6 +407,12 @@
                   "key": "has_tv_channels",
                   "title": "Has TV channels set up",
                   "description": "Uncheck if you did NOT set up your TV with TV Channels.",
+                  "notitle": false
+                },
+                {
+                  "key": "channel_setup_popup_time",
+                  "title": "time for the popup to appear (ms)",
+                  "description": "measure the time for the 'missing channels' popup to appear and enter it here.",
                   "notitle": false
                 }
               ]
