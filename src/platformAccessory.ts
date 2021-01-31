@@ -45,7 +45,7 @@ export class TelevisionAccessory {
         const macAddress = url.replace(/^WOL[:]?[/]?[/]?/gi, '');
         this.platform.log.debug('Executing WakeOnLan request to ' + macAddress);
 
-        wol.wake(macAddress, {num_packets: 20}, (error) => {
+        wol.wake(macAddress, { num_packets: 20 }, (error) => {
           if (error) {
             this.platform.log.warn('WOL-Error: ', error);
           } else {
@@ -133,30 +133,30 @@ export class TelevisionAccessory {
     this.protocol = config.protocol as string;
     this.api_version = config.api_version as number;
     this.port_no = config.api_port_no as number;
-    
+
     this.has_no_channels = !config.has_tv_channels as boolean;
     this.channel_setup_popup_time = config.channel_setup_popup_time as number;
 
     this.has_ambihue = config.has_ambihue as boolean;
     this.has_ambilight = config.has_ambilight as boolean;
 
-    if(this.has_ambilight === false) {
+    if (this.has_ambilight === false) {
       this.has_ambihue = false;
     }
 
-    if(this.startup_time < 5 * 1000 ||typeof this.startup_time !== 'number' || isNaN(this.startup_time)) {
+    if (this.startup_time < 5 * 1000 || typeof this.startup_time !== 'number' || isNaN(this.startup_time)) {
       this.startup_time = 10 * 1000;
     }
 
-    if(this.polling_interval < 15 * 1000 ||typeof this.polling_interval !== 'number' || isNaN(this.polling_interval)) {
+    if (this.polling_interval < 15 * 1000 || typeof this.polling_interval !== 'number' || isNaN(this.polling_interval)) {
       this.polling_interval = 30 * 1000;
     }
 
-    if(this.input_delay < 150 ||typeof this.input_delay !== 'number' || isNaN(this.input_delay)) {
+    if (this.input_delay < 150 || typeof this.input_delay !== 'number' || isNaN(this.input_delay)) {
       this.input_delay = 600;
     }
 
-    if(this.timeout < 2 * 1000 ||typeof this.timeout !== 'number' || isNaN(this.timeout)) {
+    if (this.timeout < 2 * 1000 || typeof this.timeout !== 'number' || isNaN(this.timeout)) {
       this.timeout = 5 * 1000;
     }
 
@@ -227,15 +227,15 @@ export class TelevisionAccessory {
 
         this.tvService.addLinkedService(inputService);
 
-        if(input.exposeAsSwitch === true) {
+        if (input.exposeAsSwitch === true) {
           const switchService = this.accessory.addService(this.platform.Service.Switch, 'switchInput' + input.position, input.name);
           switchService
             .setCharacteristic(this.platform.Characteristic.Name, input.name)
             .getCharacteristic(this.platform.Characteristic.On)
             .on('set', (newValue, callback) => {
               callback(null);
-              if(newValue === true) {
-                if(this.TvState.TvActive === false) {
+              if (newValue === true) {
+                if (this.TvState.TvActive === false) {
                   this.SetActive(this.platform.Characteristic.Active.ACTIVE);
                 }
                 this.SetActiveIdentifier(index);
@@ -294,7 +294,7 @@ export class TelevisionAccessory {
     const speakerService = this.accessory.addService(
       this.platform.Service.TelevisionSpeaker,
     );
-  
+
     speakerService
       .setCharacteristic(
         this.platform.Characteristic.Active,
@@ -304,7 +304,7 @@ export class TelevisionAccessory {
         this.platform.Characteristic.VolumeControlType,
         this.platform.Characteristic.VolumeControlType.ABSOLUTE,
       );
-  
+
     // handle volume control
     speakerService
       .getCharacteristic(this.platform.Characteristic.VolumeSelector)
@@ -321,8 +321,8 @@ export class TelevisionAccessory {
 
     setInterval(() => {
       this.platform.log.debug('Triggering interval');
-      
-      ping.sys.probe(this.ip_address, (isAlive)=> {
+
+      ping.sys.probe(this.ip_address, (isAlive) => {
         const msg = isAlive ? 'TV is alive' : 'TV is dead';
         this.platform.log.debug(msg);
       });
@@ -340,7 +340,7 @@ export class TelevisionAccessory {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      }, 
+      },
     }, this.timeout, 'Timeout Error')
       .then((response) => {
         if (!response.ok) {
@@ -361,7 +361,7 @@ export class TelevisionAccessory {
         if (error.response && error.response.status !== 200) {
           this.TvState.TvActive = false;
         }
-        if(error.code === 'EHOSTUNREACH') {
+        if (error.code === 'EHOSTUNREACH') {
           this.TvState.TvActive = false;
         }
         this.platform.log.debug('Error getPowerState : ', error);
@@ -369,7 +369,7 @@ export class TelevisionAccessory {
       .finally(() => {
         this.platform.log.debug('Now updating PowerState to:', this.TvState.TvActive);
         this.tvService.updateCharacteristic(this.platform.Characteristic.Active, this.TvState.TvActive);
-        if(callback){
+        if (callback) {
           callback(null, this.TvState.TvActive);
         }
       });
@@ -386,7 +386,7 @@ export class TelevisionAccessory {
         await this.waitFor(this.startup_time)
           .then(() => {
             this.platform.log.debug('Setting AmbiHue after ', this.startup_time);
-            if(this.ambihueService) {
+            if (this.ambihueService) {
               this.ambihueService.getCharacteristic(this.platform.Characteristic.On).setValue(true);
             }
           },
@@ -456,17 +456,17 @@ export class TelevisionAccessory {
         if (error.response && error.response.status !== 200) {
           this.TvState.AmbiHueActive = false;
         }
-        if(error.code === 'EHOSTUNREACH') {
+        if (error.code === 'EHOSTUNREACH') {
           this.TvState.AmbiHueActive = false;
         }
         this.platform.log.debug('Error getAmbihueState : ', error);
       })
       .finally(() => {
         this.platform.log.debug('Now updating AmbiHueState to:', this.TvState.AmbiHueActive);
-        if(this.ambihueService) {
+        if (this.ambihueService) {
           this.ambihueService.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbiHueActive);
         }
-        if(callback){
+        if (callback) {
           callback(null, this.TvState.AmbiHueActive);
         }
       });
@@ -475,7 +475,7 @@ export class TelevisionAccessory {
   async SetAmbiHue(value: CharacteristicValue) {
     const newPowerState = value;
     this.platform.log.debug('Setting ambihue to: ', newPowerState);
-    if(this.TvState.TvActive === false) {
+    if (this.TvState.TvActive === false) {
       this.platform.log.debug('Waiting for TV to turn on');
       await this.waitFor(this.startup_time);
     }
@@ -502,13 +502,13 @@ export class TelevisionAccessory {
   async SetActiveIdentifier(value: CharacteristicValue) {
     const input = this.inputs[value as number];
     this.platform.log.debug('Setting input to: ', input.name, input.type, InputType.App);
-    
-    if(this.TvState.TvActive === false) {
+
+    if (this.TvState.TvActive === false) {
       this.platform.log.debug('Waiting for TV to turn on');
       await this.waitFor(this.startup_time);
     }
 
-    if (input.type as InputType === InputType.TV ) {
+    if (input.type as InputType === InputType.TV) {
       await fetchTimeout(this.input_url, {
         method: 'POST',
         headers: {
@@ -531,24 +531,24 @@ export class TelevisionAccessory {
       const moves: string[] = [];
 
       // Build the moves[]
-      if(input.type as InputType === InputType.App) {
+      if (input.type as InputType === InputType.App) {
         moves.push(JSON.stringify({ key: 'Home' }));
       }
-      if(input.type as InputType === InputType.Source) {
+      if (input.type as InputType === InputType.Source) {
         moves.push(JSON.stringify({ key: 'WatchTV' }));
-        
-          moves.push(JSON.stringify({ key: 'Source' }));
+
+        moves.push(JSON.stringify({ key: 'Source' }));
         moves.push(JSON.stringify({ key: 'CursorDown' }));
       }
-      if(input.type as InputType === InputType.Channel) {
+      if (input.type as InputType === InputType.Channel) {
         moves.push(JSON.stringify({ key: 'WatchTV' }));
         const num = Math.abs(input.position);
         const digits = num.toString().split('');
         digits.forEach(digit => {
-          moves.push(JSON.stringify({ key: 'Digit'+digit }));
+          moves.push(JSON.stringify({ key: 'Digit' + digit }));
         });
       } else {
-        
+
         while (Math.abs(stepsToMake) !== 0) {
           if (stepsToMake > 0) {
             moves.push(JSON.stringify({ key: 'CursorRight' }));
@@ -584,14 +584,12 @@ export class TelevisionAccessory {
             this.platform.log.debug('could not finish move ', move);
           });
 
-          if(move === JSON.stringify({ key: 'WatchTV' }))
-          {
-            if(this.has_no_channels === true)
-            {
-              this.platform.log.debug('waiting ' + this.channel_setup_popup_time + ' ms for channel popup');
-              await this.waitFor(this.channel_setup_popup_time);
-            }
+        if (move === JSON.stringify({ key: 'WatchTV' })) {
+          if (this.has_no_channels === true) {
+            this.platform.log.debug('waiting ' + this.channel_setup_popup_time + ' ms for channel popup');
+            await this.waitFor(this.channel_setup_popup_time);
           }
+        }
       }
 
       this.platform.log.debug('finished moves!');
