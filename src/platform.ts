@@ -4,6 +4,7 @@ import {
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { TelevisionAccessory } from './platformAccessory';
+import { Input } from './input';
 
 /**
  * HomebridgePlatform
@@ -49,10 +50,14 @@ export class SaphiTvPlatform implements DynamicPlatformPlugin {
 
     const uuidRemote = this.api.hap.uuid.generate(PLUGIN_NAME + tvName + 'Remote');
     const remoteAccessory = new this.api.platformAccessory(tvName + 'Remote', uuidRemote);
+    const inputs = this.config.inputs as Input[];
+    
+    if (inputs.filter(input => input.exposeAsSwitch === true).length > 0) {
+      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [remoteAccessory]);
+    }
 
     new TelevisionAccessory(this, tvAccessory, remoteAccessory, this.config);
     this.api.publishExternalAccessories(PLUGIN_NAME, [tvAccessory]);
-    this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [remoteAccessory]);
   }
 
   removeAllAccessories() {
