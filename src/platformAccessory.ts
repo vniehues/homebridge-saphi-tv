@@ -37,7 +37,7 @@ export class TelevisionAccessory {
     return new Promise(() => {
       this.platform.log.debug('calling WOL with URL %s', url);
       if (!url) {
-        this.platform.log.warn('WOL-Error: ');
+        this.platform.log.warn('WOL-Error: ', 'No WOL-Address given.');
         return;
       }
       if (url.substring(0, 3).toUpperCase() === 'WOL') {
@@ -54,36 +54,18 @@ export class TelevisionAccessory {
         });
       } else {
         if (url.length > 3) {
-          this.platform.log.warn('WOL-Error: ');
+          this.platform.log.warn('WOL-Error: ', 'The given WOL-Address does not have the correct format. Please double check your configuration');
         } else {
-          this.platform.log.warn('WOL-Error: ');
+          this.platform.log.warn('WOL-Error: ', 'No WOL-Address given.');
         }
       }
     },
     );
   }
 
-  fetchWithPromise = (url: string, body: string) =>
-    new Promise((resolve, reject) => {
-
-      fetchTimeout(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      }, this.timeout, 'Timeout Error')
-        .then(resolve)
-        .catch(reject);
-    });
-
   private tvService: Service;
   private ambihueService?: Service;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
   private TvState = {
     TvActive: false,
     AmbiHueActive: false,
