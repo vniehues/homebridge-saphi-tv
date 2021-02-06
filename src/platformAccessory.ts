@@ -6,6 +6,7 @@ import { Input } from './input';
 import { InputType } from './inputType';
 import { Configuration } from './configuration';
 import { Utilities } from './utilities';
+import { SaphiTvPlatform } from './platform';
 
 /**
  * Platform Accessory
@@ -26,7 +27,7 @@ export class TelevisionAccessory {
   ambihue_on_body = { power: 'On' };
   ambihue_off_body = { power: 'Off' };
   config: Configuration;
-  platform: any;
+  platform: SaphiTvPlatform;
 
   constructor(
     public readonly utilities: Utilities,

@@ -17,7 +17,7 @@ export class Utilities {
     }, this.config.timeout, 'Timeout Error');
   }
 
-  async POST(url: string, body: any): Promise<Response> {
+  async POST(url: string, body: unknown): Promise<Response> {
     return await fetchTimeout(url, {
       method: 'POST',
       headers: {
@@ -52,7 +52,8 @@ export class Utilities {
         });
       } else {
         if (url.length > 3) {
-          this.platform.log.warn('WOL-Error: ', 'The given WOL-Address does not have the correct format. Please double check your configuration');
+          this.platform.log.warn('WOL-Error: ', 
+            'The given WOL-Address does not have the correct format. Please double check your configuration');
         } else {
           this.platform.log.warn('WOL-Error: ', 'No WOL-Address given.');
         }
