@@ -1,6 +1,9 @@
-<span align="center">
+  <p align="center">
 <img src="https://github.com/homebridge/branding/raw/master/logos/homebridge-wordmark-logo-vertical.png" width="250">
+  </p>
   
+<span align="center">
+
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![Downloads](https://img.shields.io/npm/dt/homebridge-saphi-tv)](https://www.npmjs.com/package/homebridge-saphi-tv)
 [![Version](https://img.shields.io/npm/v/homebridge-saphi-tv)](https://www.npmjs.com/package/homebridge-saphi-tv)
