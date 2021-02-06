@@ -1,14 +1,11 @@
-
-<p align="center">
-
+<span align="center">
 <img src="https://github.com/homebridge/branding/raw/master/logos/homebridge-wordmark-logo-vertical.png" width="250">
-
-</p>
-<p align="center">
   
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![Downloads](https://img.shields.io/npm/dt/homebridge-saphi-tv)](https://www.npmjs.com/package/homebridge-saphi-tv)
+[![Version](https://img.shields.io/npm/v/homebridge-saphi-tv)](https://www.npmjs.com/package/homebridge-saphi-tv)
 
-</p>
+</span>
 
 # Homebridge Philips TV SaphiOS
 
@@ -99,20 +96,16 @@ Some whishful thinking:
             ]
          }
 
-<!--
-| Option                 | Description                                                                                                   | Default |  Example  |
-|------------------------|---------------------------------------------------------------------------------------------------------------|---------|-----------|
-| alternativePlayPause   | Sends Play or Pause alternating, based on internal state, instead of PlayPause to TV when not defined (false) | false   | true      |
-| dedicatedMuteSwitch     | If enabled plugin register additional Switch Service that will mute, or unmute TV. Might be useful when setting scenes. | false   | true      |
-| dedicatedVolumeLightbulb   | If enabled plugin register additional Lightbulb Service that will control Volume of TV. Might be useful when setting scenes. | false   | true      |
-Maybe adding more options in table?
--->
-
 The TV is registered as "External Accessory", it has to be added manually in Home app once.
 Just tap on "+" -> "Add new Device" -> "No code" and you should see your TV. The code is the same as the one your Homebridge uses.
 
 # References
-
+<p>
 Key knowledge about Philips TV APIs: https://github.com/eslavnov/pylips/wiki
+</p>
+<p>
 Specific calls and adaptation as Homebridge plugin: https://github.com/98oktay/homebridge-philips-tv6#readme
-
+</p>
+<p>
+References for README.md: https://github.com/ebaauw/homebridge-hue/blob/master/README.md
+</p>
