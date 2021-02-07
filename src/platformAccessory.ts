@@ -57,9 +57,6 @@ export class TelevisionAccessory {
         });
     }
 
-
-
-    // get/set the service
     this.tvService = this.tvAccessory.addService(this.platform.Service.Television, 'ActiveInput');
 
     if (this.config.inputs && this.config.inputs.length > 0) {
@@ -329,46 +326,44 @@ export class TelevisionAccessory {
 
 
       let stepsToMake = input.position;
-      const moves: string[] = [];
+      const moves: unknown[] = [];
 
       // Build the moves[]
       if (input.type as InputType === InputType.App) {
-        moves.push(JSON.stringify({ key: 'Home' }));
+        moves.push({ key: 'Home' });
       }
       if (input.type as InputType === InputType.Source) {
-        moves.push(JSON.stringify({ key: 'WatchTV' }));
+        moves.push({ key: 'WatchTV' });
 
-        moves.push(JSON.stringify({ key: 'Source' }));
-        moves.push(JSON.stringify({ key: 'CursorDown' }));
+        moves.push({ key: 'Source' });
+        moves.push({ key: 'CursorDown' });
       }
       if (input.type as InputType === InputType.Channel) {
-        moves.push(JSON.stringify({ key: 'WatchTV' }));
+        moves.push({ key: 'WatchTV' });
         const num = Math.abs(input.position);
         const digits = num.toString().split('');
         digits.forEach(digit => {
-          moves.push(JSON.stringify({ key: 'Digit' + digit }));
+          moves.push({ key: 'Digit' + digit });
         });
       } else {
 
         while (Math.abs(stepsToMake) !== 0) {
           if (stepsToMake > 0) {
-            moves.push(JSON.stringify({ key: 'CursorRight' }));
+            moves.push({ key: 'CursorRight' });
             stepsToMake--;
           }
           if (stepsToMake < 0) {
-            moves.push(JSON.stringify({ key: 'CursorLeft' }));
+            moves.push({ key: 'CursorLeft' });
             stepsToMake++;
           }
         }
       }
-      moves.push(JSON.stringify({ key: 'Confirm' }));
-
+      moves.push({ key: 'Confirm' });
       this.platform.log.debug('Moves: ', moves);
 
 
       // Execute moves[] one-by-one
       for (const move of moves) {
-
         await this.utilities.POST(this.config.input_url, move)
           .then(response => response.text())
           .then(data => this.platform.log.debug('response: ', data))
@@ -380,7 +375,7 @@ export class TelevisionAccessory {
           });
 
         // Aditional delays because WatchTV takes time to load and even more if there are no channels installed.
-        if (move === JSON.stringify({ key: 'WatchTV' })) {
+        if (move === { key: 'WatchTV' }) {
           if (this.config.has_tv_channels === false) {
             this.platform.log.debug('waiting ' + this.config.channel_setup_popup_time + ' ms for channel popup');
             await this.utilities.waitFor(this.config.channel_setup_popup_time);
@@ -406,57 +401,46 @@ export class TelevisionAccessory {
         break;
       }
       case this.platform.Characteristic.RemoteKey.NEXT_TRACK: {
-
         KeyToPress = { key: 'Next' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.PREVIOUS_TRACK: {
-
         KeyToPress = { key: 'Previous' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.ARROW_UP: {
-
         KeyToPress = { key: 'CursorUp' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.ARROW_DOWN: {
-
         KeyToPress = { key: 'CursorDown' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.ARROW_LEFT: {
-
         KeyToPress = { key: 'CursorLeft' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.ARROW_RIGHT: {
-
         KeyToPress = { key: 'CursorRight' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.SELECT: {
-
         KeyToPress = { key: 'Confirm' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.BACK: {
-
         KeyToPress = { key: 'Back' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.EXIT: {
-
         KeyToPress = { key: 'Exit' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.PLAY_PAUSE: {
-
         KeyToPress = { key: 'PlayPause' };
         break;
       }
       case this.platform.Characteristic.RemoteKey.INFORMATION: {
-
         KeyToPress = { key: 'Options' };
         break;
       }
