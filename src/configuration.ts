@@ -30,6 +30,10 @@ export class Configuration {
       this.inputs = config.inputs as [];
       this.name = config.name as string;
 
+      if(!this.wol_url.startsWith('wol://')) {
+        this.wol_url = 'wol://'+this.wol_url;
+      }
+
       // timings
       this.polling_interval = config.polling_interval as number * 1000 || 30000;
       this.startup_time = config.startup_time as number * 1000 || 15000;
