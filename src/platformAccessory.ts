@@ -343,7 +343,11 @@ export class TelevisionAccessory {
         const num = Math.abs(input.position);
         const digits = num.toString().split('');
         digits.forEach(digit => {
-          moves.push({ key: 'Digit' + digit });
+          if(digit === '.') {
+            moves.push({ key: 'Dot' });
+          } else {
+            moves.push({ key: 'Digit' + digit });
+          }
         });
       } else {
 

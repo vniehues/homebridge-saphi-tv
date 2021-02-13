@@ -55,7 +55,7 @@ export class SaphiTvPlatform implements DynamicPlatformPlugin {
     const inputs = this.config.inputs as Input[];
     
     if (inputs && inputs.filter(input => input.exposeAsSwitch === true).length > 0) {
-      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [remoteAccessory]);
+      this.api.publishExternalAccessories(PLUGIN_NAME, [remoteAccessory]);
     }
 
     const configuration = new Configuration(this.config);
