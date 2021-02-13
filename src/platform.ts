@@ -4,7 +4,6 @@ import {
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { TelevisionAccessory } from './tvAccessory';
-import { Input } from './input';
 import { Configuration } from './configuration';
 import { Utilities } from './utilities';
 
