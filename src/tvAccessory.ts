@@ -43,8 +43,11 @@ export class TelevisionAccessory {
     this.platform.log.debug('inputURL: ', this.config.input_url);
     this.platform.log.debug('ambihueURL: ', this.config.ambihue_url);
 
-    if (this.config.has_ambihue) {
-      this.ambihueService = this.tvAccessory.addService(this.platform.Service.Switch, 'Ambilight Plus');
+    this.tvService = this.tvAccessory.addService(this.platform.Service.Television, 'ActiveInput');
+
+    // Add AmbiHue switch to remote accessory
+    if (this.config.has_ambilight && this.config.has_ambihue) {
+      this.ambihueService = this.remoteAccessory.addService(this.platform.Service.Switch, 'Ambilight Plus Hue');
       this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
         .on('get', (callback) => {
           this.GetAmbiHue(callback);
@@ -57,9 +60,8 @@ export class TelevisionAccessory {
         });
     }
 
-    this.tvService = this.tvAccessory.addService(this.platform.Service.Television, 'ActiveInput');
-
     if (this.config.inputs && this.config.inputs.length > 0) {
+      // Add inputs to TV accessory
       this.config.inputs.forEach((input: Input, index) => {
         const inputService = this.tvAccessory.addService(this.platform.Service.InputSource, 'input' + input.position, input.name);
         inputService
@@ -71,32 +73,43 @@ export class TelevisionAccessory {
 
         this.tvService.addLinkedService(inputService);
 
-        if (input.exposeAsSwitch === true) {
-          const switchService = this.remoteAccessory.addService(this.platform.Service.Switch, 'switchInput' + input.position, input.name);
-          switchService
-            .setCharacteristic(this.platform.Characteristic.Name, input.name)
-            .getCharacteristic(this.platform.Characteristic.On)
-            .on('set', (newValue, callback) => {
-              callback(null);
-              if (newValue === true) {
-                if (this.TvState.TvActive === false) {
-                  this.SetActive(this.platform.Characteristic.Active.ACTIVE);
-                }
-                this.SetActiveIdentifier(index);
-                switchService.updateCharacteristic(this.platform.Characteristic.On, false);
+        // Add inputs to remote accessory
+        const switchService = this.remoteAccessory.addService(this.platform.Service.Outlet, 'switchInput' + input.position, input.name);
+        switchService
+          .setCharacteristic(this.platform.Characteristic.Name, input.name)
+          .getCharacteristic(this.platform.Characteristic.On)
+          .on('set', (newValue, callback) => {
+            callback(null);
+            if (newValue === true) {
+              if (this.TvState.TvActive === false) {
+                this.SetActive(this.platform.Characteristic.Active.ACTIVE);
               }
-            });
-        }
+              this.SetActiveIdentifier(index);
+              switchService.updateCharacteristic(this.platform.Characteristic.On, false);
+            }
+          });
       });
     }
 
+    
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pjson = require('../package.json');
 
     // set accessory information
     this.tvAccessory.category = Categories.TELEVISION;
     this.tvAccessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Default-Manufacturer')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, pjson['author'])
+      .setCharacteristic(this.platform.Characteristic.Model, pjson['name'])
+      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, pjson['version'])
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, pjson['version']);
+
+
+    this.remoteAccessory.category = Categories.AUDIO_RECEIVER;
+    this.remoteAccessory.getService(this.platform.Service.AccessoryInformation)!
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, pjson['author'])
+      .setCharacteristic(this.platform.Characteristic.Model, pjson['name'])
+      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, pjson['version'])
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, pjson['version']);
 
     // set the tv name
     this.tvService.setCharacteristic(this.platform.Characteristic.Name, this.config.name);
