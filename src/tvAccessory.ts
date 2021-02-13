@@ -104,7 +104,8 @@ export class TelevisionAccessory {
       .setCharacteristic(this.platform.Characteristic.SerialNumber, pjson['version']);
 
 
-    this.remoteAccessory.category = Categories.AUDIO_RECEIVER;
+    //TODO: Check if Categories.TARGET_CONTROLLER will work in the future!
+    this.remoteAccessory.category = Categories.TV_STREAMING_STICK;
     this.remoteAccessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, pjson['author'])
       .setCharacteristic(this.platform.Characteristic.Model, pjson['name'])

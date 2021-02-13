@@ -38,9 +38,19 @@ export class SaphiTvPlatform implements IndependentPlatformPlugin {
     accessory.on(PlatformAccessoryEvent.IDENTIFY, () => {
       this.log.info('%s identified', accessory.displayName);
     });
+
+    this.accessories.push(accessory);
+  }
+
+  removeAllAccessories() {
+    this.log.info('removing all accessories');
+    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, this.accessories);
+    this.accessories.splice(0, this.accessories.length);
   }
 
   publishExampleExternalAccessory() {
+    this.removeAllAccessories();
+
     const tvName = this.config.name || 'Saphi TV';
     const uuidTv = this.api.hap.uuid.generate(PLUGIN_NAME + tvName);
     const tvAccessory = new this.api.platformAccessory(tvName, uuidTv);
