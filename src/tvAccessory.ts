@@ -7,6 +7,7 @@ import { InputType } from './inputType';
 import { Configuration } from './configuration';
 import { Utilities } from './utilities';
 import { SaphiTvPlatform } from './platform';
+import { callbackify } from 'util';
 
 /**
  * Platform Accessory
@@ -15,17 +16,22 @@ import { SaphiTvPlatform } from './platform';
  */
 export class TelevisionAccessory {
   private tvService: Service;
-  private ambihueService?: Service;
+  private ambihueService!: Service;
+  private ambilightService!: Service;
+  private audioService!: Service;
 
   private TvState = {
     TvActive: false,
     AmbiHueActive: false,
+    AmbilightActive: false,
   };
 
   power_on_body = { powerstate: 'On' };
   power_off_body = { powerstate: 'Standby' };
   ambihue_on_body = { power: 'On' };
   ambihue_off_body = { power: 'Off' };
+  ambilight_on_body = { power: 'On' };
+  ambilight_off_body = { power: 'Off' };
   config: Configuration;
   platform: SaphiTvPlatform;
 
@@ -46,50 +52,53 @@ export class TelevisionAccessory {
     this.tvService = this.tvAccessory.addService(this.platform.Service.Television, 'ActiveInput');
 
     // Add AmbiHue switch to remote accessory
-    if (this.config.has_ambilight && this.config.has_ambihue) {
-      this.ambihueService = this.remoteAccessory.addService(this.platform.Service.Switch, 'Ambilight Plus Hue');
-      this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
-        .on('get', (callback) => {
-          this.GetAmbiHue(callback);
-          this.platform.log.debug('Get AmbiHue');
-        })
-        .on('set', (newValue, callback) => {
-          this.SetAmbiHue(newValue);
-          callback(null);
-          this.platform.log.debug('set AmbiHue => ' + newValue);
-        });
-    }
+    if (this.config.has_ambilight) {
 
-    if (this.config.inputs && this.config.inputs.length > 0) {
-      // Add inputs to TV accessory
-      this.config.inputs.forEach((input: Input, index) => {
-        const inputService = this.tvAccessory.addService(this.platform.Service.InputSource, 'input' + input.position, input.name);
-        inputService
-          .setCharacteristic(this.platform.Characteristic.ConfiguredName, input.name)
-          .setCharacteristic(this.platform.Characteristic.Identifier, index)
-          .setCharacteristic(this.platform.Characteristic.CurrentVisibilityState, this.platform.Characteristic.CurrentVisibilityState.SHOWN)
-          .setCharacteristic(this.platform.Characteristic.IsConfigured, this.platform.Characteristic.IsConfigured.CONFIGURED)
-          .setCharacteristic(this.platform.Characteristic.InputSourceType, this.platform.Characteristic.InputSourceType.APPLICATION);
+      // TODO: implement get & set with reference to old project.
+      // TODO: implement brightness with reference to old project.
+      // this.ambilightService = this.remoteAccessory.addService(this.platform.Service.Outlet, 'Ambilight', 'ambilight');
+      // this.ambilightService.getCharacteristic(this.platform.Characteristic.On)
+      //   .on('get', (callback) => {
+      //     this.GetAmbilight(callback);
+      //     this.platform.log.debug('Get AmbiLight');
+      //   })
+      //   .on('set', (newValue, callback) => {
+      //     this.SetAmbilight(newValue);
+      //     callback(null);
+      //     this.platform.log.debug('Set AmbiLight => ' + newValue);
+      //   });
 
-        this.tvService.addLinkedService(inputService);
-
-        // Add inputs to remote accessory
-        const switchService = this.remoteAccessory.addService(this.platform.Service.Outlet, 'switchInput' + input.position, input.name);
-        switchService
-          .setCharacteristic(this.platform.Characteristic.Name, input.name)
-          .getCharacteristic(this.platform.Characteristic.On)
+      if(this.config.has_ambihue){
+        this.ambihueService = this.remoteAccessory.addService(this.platform.Service.Switch, 'Ambilight Plus Hue', 'ambihue');
+        this.ambihueService.getCharacteristic(this.platform.Characteristic.On)
+          .on('get', (callback) => {
+            this.GetAmbiHue(callback);
+            this.platform.log.debug('Get AmbiHue');
+          })
           .on('set', (newValue, callback) => {
+            this.SetAmbiHue(newValue);
             callback(null);
-            if (newValue === true) {
-              if (this.TvState.TvActive === false) {
-                this.SetActive(this.platform.Characteristic.Active.ACTIVE);
-              }
-              this.SetActiveIdentifier(index);
-              switchService.updateCharacteristic(this.platform.Characteristic.On, false);
-            }
+            this.platform.log.debug('set AmbiHue => ' + newValue);
           });
-      });
+      }
     }
+
+    // TODO: implement get & set with reference to old project.
+    // this.audioService = this.remoteAccessory.addService(this.platform.Service.Lightbulb, 'Volume', 'tvVolume');
+    // this.audioService.getCharacteristic(this.platform.Characteristic.Brightness)
+    //   .on('get', (callback) => {
+    //     // this.GetVolume(callback);
+    //     callback();
+    //     this.platform.log.debug('Get Volume');
+    //   })
+    //   .on('set', (newValue, callback) => {
+    //     const volume = newValue / 100 * 60;
+    //     // this.SetVolume(volume);
+    //     callback(null);
+    //     this.platform.log.debug('Set Volume => ' + volume);
+    //   });
+
+    this.AddInputServices();
 
     
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -100,6 +109,7 @@ export class TelevisionAccessory {
     this.tvAccessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, pjson['author'])
       .setCharacteristic(this.platform.Characteristic.Model, pjson['name'])
+      .setCharacteristic(this.platform.Characteristic.Name, this.config.name)
       .setCharacteristic(this.platform.Characteristic.FirmwareRevision, pjson['version'])
       .setCharacteristic(this.platform.Characteristic.SerialNumber, pjson['version']);
 
@@ -109,6 +119,8 @@ export class TelevisionAccessory {
     this.remoteAccessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, pjson['author'])
       .setCharacteristic(this.platform.Characteristic.Model, pjson['name'])
+      .setCharacteristic(this.platform.Characteristic.Name, this.config.name + ' Remote')
+      .setCharacteristic(this.platform.Characteristic.ConfiguredName, this.config.name + ' Remote')
       .setCharacteristic(this.platform.Characteristic.FirmwareRevision, pjson['version'])
       .setCharacteristic(this.platform.Characteristic.SerialNumber, pjson['version']);
 
@@ -190,6 +202,43 @@ export class TelevisionAccessory {
         this.GetAmbiHue(null);
       }
     }, this.config.polling_interval);
+  }
+
+  async AddInputServices() {
+    await this.utilities.waitFor(1000);
+    if (this.config.inputs && this.config.inputs.length > 0) {
+    // Add inputs to TV accessory
+      this.config.inputs.filter(x => x.name && x.type && (x.position || x.type == InputType.TV)).forEach((input: Input, index) => {
+        const inputService = this.tvAccessory.addService(this.platform.Service.InputSource, input.name, 'input' + input.name + input.position || 0);
+        inputService
+          .setCharacteristic(this.platform.Characteristic.ConfiguredName, input.name)
+          .setCharacteristic(this.platform.Characteristic.Identifier, index)
+          .setCharacteristic(this.platform.Characteristic.CurrentVisibilityState, this.platform.Characteristic.CurrentVisibilityState.SHOWN)
+          .setCharacteristic(this.platform.Characteristic.IsConfigured, this.platform.Characteristic.IsConfigured.CONFIGURED)
+          .setCharacteristic(this.platform.Characteristic.InputSourceType, this.platform.Characteristic.InputSourceType.APPLICATION);
+
+        this.tvService.addLinkedService(inputService);
+
+        // Add inputs to remote accessory
+        const switchService = this.remoteAccessory.addService(this.platform.Service.Outlet, input.name, 'switchInput'+ input.name + input.position || 0);
+        switchService
+          .setCharacteristic(this.platform.Characteristic.Name, input.name)
+          .getCharacteristic(this.platform.Characteristic.On)
+          .on('set', (newValue, callback) => {
+            callback(null);
+            if (newValue === true) {
+              if (this.TvState.TvActive === false) {
+                this.SetActive(this.platform.Characteristic.Active.ACTIVE);
+              }
+              this.SetActiveIdentifier(index);
+              switchService.updateCharacteristic(this.platform.Characteristic.On, false);
+            }
+          })
+          .on('get', (callback) => {
+            callback(false);
+          });
+      });
+    }
   }
 
 
@@ -316,6 +365,58 @@ export class TelevisionAccessory {
       await this.utilities.POST(this.config.ambihue_url, this.ambihue_off_body);
     }
   }
+
+  async GetAmbilight(callback) {
+    await this.utilities.GET(this.config.ambilight_url)
+      .then((response) => {
+        if (!response.ok) {
+          throw Error(response.status);
+        }
+        return response;
+      })
+      .then(response => response.json())
+      .then(result => {
+        this.platform.log.debug('Success:', result);
+        if (JSON.stringify(result) === JSON.stringify(this.ambilight_on_body)) {
+          this.TvState.AmbilightActive = true;
+        } else if (JSON.stringify(result) === JSON.stringify(this.ambilight_off_body)) {
+          this.TvState.AmbilightActive = false;
+        }
+      })
+      .catch(error => {
+        if (error.response && error.response.status !== 200) {
+          this.TvState.AmbilightActive = false;
+        }
+        if (error.code === 'EHOSTUNREACH') {
+          this.TvState.AmbilightActive = false;
+        }
+        this.platform.log.debug('Error getAmbilightState : ', error);
+      })
+      .finally(() => {
+        this.platform.log.debug('Now updating AmbilightState to:', this.TvState.AmbilightActive);
+        if (this.ambihueService) {
+          this.ambihueService.updateCharacteristic(this.platform.Characteristic.On, this.TvState.AmbilightActive);
+        }
+        if (callback) {
+          callback(null, this.TvState.AmbilightActive);
+        }
+      });
+  }
+
+  async SetAmbilight(value: CharacteristicValue) {
+    const newPowerState = value;
+    this.platform.log.debug('Setting ambihue to: ', newPowerState);
+    if (this.TvState.TvActive === false) {
+      this.platform.log.debug('Waiting for TV to turn on');
+      await this.utilities.waitFor(this.config.startup_time);
+    }
+    if (newPowerState) {
+      await this.utilities.POST(this.config.ambilight_url, this.ambilight_on_body);
+    } else {
+      await this.utilities.POST(this.config.ambilight_url, this.ambilight_off_body);
+    }
+  }
+
 
   async SetActiveIdentifier(value: CharacteristicValue) {
     const input = this.config.inputs[value as number];
