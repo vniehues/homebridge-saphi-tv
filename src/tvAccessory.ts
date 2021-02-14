@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-
 import { Service, PlatformAccessory, Categories, CharacteristicValue } from 'homebridge';
 import ping from 'ping';
 import { Input } from './input';
@@ -7,7 +6,6 @@ import { InputType } from './inputType';
 import { Configuration } from './configuration';
 import { Utilities } from './utilities';
 import { SaphiTvPlatform } from './platform';
-import { callbackify } from 'util';
 
 /**
  * Platform Accessory
@@ -208,7 +206,7 @@ export class TelevisionAccessory {
     await this.utilities.waitFor(1000);
     if (this.config.inputs && this.config.inputs.length > 0) {
     // Add inputs to TV accessory
-      this.config.inputs.filter(x => x.name && x.type && (x.position || x.type == InputType.TV)).forEach((input: Input, index) => {
+      this.config.inputs.filter(x => x.name && x.type && (x.position || x.type === InputType.TV)).forEach((input: Input, index) => {
         const inputService = this.tvAccessory.addService(this.platform.Service.InputSource, input.name, 'input' + input.name + input.position || 0);
         inputService
           .setCharacteristic(this.platform.Characteristic.ConfiguredName, input.name)
