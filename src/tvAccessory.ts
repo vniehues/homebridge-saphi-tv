@@ -41,6 +41,8 @@ export class TelevisionAccessory {
     this.config = utilities.config;
     this.platform = utilities.platform;
 
+    this.config.inputs = this.config.inputs.filter(x => x.name && x.type && (x.position || x.position === 0 || x.type === InputType.TV));
+
     this.platform.log.debug('times: ', this.config.startup_time, this.config.polling_interval, this.config.input_delay, this.config.timeout);
     this.platform.log.debug('inputs: ', this.config.inputs);
     this.platform.log.debug('powerURL: ', this.config.power_url);
@@ -206,7 +208,7 @@ export class TelevisionAccessory {
     await this.utilities.waitFor(1000);
     if (this.config.inputs && this.config.inputs.length > 0) {
     // Add inputs to TV accessory
-      this.config.inputs.filter(x => x.name && x.type && (x.position || x.type === InputType.TV)).forEach((input: Input, index) => {
+      this.config.inputs.forEach((input: Input, index) => {
         const inputService = this.tvAccessory.addService(this.platform.Service.InputSource, input.name, 'input' + input.name + input.position || 0);
         inputService
           .setCharacteristic(this.platform.Characteristic.ConfiguredName, input.name)
