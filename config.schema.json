@@ -12,10 +12,12 @@
       },
       "ip_adress": {
         "type": "string",
+        "format": "ipv4",
         "required": true
       },
       "wol_adress": {
         "type": "string",
+        "pattern":"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$",
         "required": true
       },
       "has_tv_channels": {
@@ -166,9 +168,10 @@
               ]
             },
             "position": {
-              "type": "number",
+              "type": "string",
               "required": true,
               "placeholder": "1",
+              "pattern": "^\\d+(\\.\\d+)*$",
               "condition": {
                 "functionBody": "return model.inputs[arrayIndices].type !== 'TV';"
               }
@@ -202,12 +205,20 @@
               "key": "ip_adress",
               "placeholder": "192.168.78.98",
               "notitle": false,
+              "validationMessage": {
+                "202": "Wrong format! Try a valid mac-address",
+                "302": "This field is like, uh, required?"
+              },
               "description": "IP adress of your TV"
             },
             {
               "title": "MAC Adress",
               "key": "wol_adress",
               "notitle": false,
+              "validationMessage": {
+                "202": "Wrong format! Try a valid mac-address",
+                "302": "This field is like, really required :D"
+              },
               "placeholder": "20:DE:20:DE:20:DE",
               "description": "mac adress of your TV"
             }
@@ -297,6 +308,10 @@
                   "flex": "1 1 50px",
                   "notitle": false,
                   "title": "Position",
+                  "validationMessage": {
+                    "202": "Wrong format! Try one of these: 12, 12.1, 0",
+                    "302": "This field is like, uh, required?"
+                  },
                   "placeholder": "Position"
                 }
               ]

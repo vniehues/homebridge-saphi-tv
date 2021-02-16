@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "fetch-timeout": "0.0.2",
+    "homebridge-saphi-tv": "^0.0.28-5",
     "node-fetch": "^2.6.1",
     "np": "^7.2.0",
     "ping": "^0.4.0",
