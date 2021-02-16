@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/homebridge/branding/raw/master/logos/homebridge-wordmark-logo-vertical.png" width="250">
+  <img src="https://raw.githubusercontent.com/vniehues/saphi_tv/master/homebridge-color-round.png" width="250">
 </p>
 <span align="center">
   
