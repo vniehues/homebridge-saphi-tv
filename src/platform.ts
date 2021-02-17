@@ -62,12 +62,7 @@ export class SaphiTvPlatform implements IndependentPlatformPlugin {
     const utilities = new Utilities(configuration, this);
 
     new TelevisionAccessory(utilities, tvAccessory, remoteAccessory );
-    this.log.info('Publishing TV-Accessory');
-    this.api.publishExternalAccessories(PLUGIN_NAME, [tvAccessory]);
-
-    if(remoteAccessory.services && remoteAccessory.services.length > 1){
-      this.log.info('Publishing Remote-Accessory');
-      this.api.publishExternalAccessories(PLUGIN_NAME, [remoteAccessory]);
-    }
+    this.log.info('Publishing TV & Remote');
+    this.api.publishExternalAccessories(PLUGIN_NAME, [tvAccessory, remoteAccessory]);
   }
 }
