@@ -449,9 +449,7 @@ export class TelevisionAccessory {
       }
       if (input.type as InputType === InputType.Source) {
         moves.push({ key: 'WatchTV' });
-
-        moves.push({ key: 'Source' });
-        moves.push({ key: 'CursorDown' });
+        moves.push({ key: input.name });
       }
       if (input.type as InputType === InputType.Channel) {
         moves.push({ key: 'WatchTV' });
