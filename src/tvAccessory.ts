@@ -47,9 +47,9 @@ export class TelevisionAccessory {
     this.platform.log.debug('inputs: ', this.config.inputs);
     this.platform.log.debug('powerURL: ', this.config.power_url);
     this.platform.log.debug('inputURL: ', this.config.input_url);
+    this.platform.log.debug('ambihueURL: ', this.config.ambihue_url);
     this.platform.log.debug('multirow apps: ', this.config.multirow_apps);
     this.platform.log.debug('vertical inputs: ', this.config.vertical_inputs);
-    this.platform.log.debug('ambihueURL: ', this.config.ambihue_url);
 
 
     this.tvService = this.tvAccessory.addService(this.platform.Service.Television, 'ActiveInput');
@@ -452,7 +452,7 @@ export class TelevisionAccessory {
 
         if (this.config.multirow_apps === true) {
           let rowToReach = input.row;
-          this.platform.log.debug('multirow true, row: ', rowToReach);
+          this.platform.log.debug('setting row: ', rowToReach);
           if (rowToReach > 0) {
             moves.push({ key: 'CursorDown' });
             rowToReach--;
