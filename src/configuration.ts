@@ -19,6 +19,8 @@ export class Configuration {
     channel_setup_popup_time: number;
     has_ambihue: boolean;
     has_ambilight: boolean;
+    vertical_inputs: boolean;
+    multirow_apps: boolean;
     input_url: string;
     ambihue_url: string;
     power_url: string;
@@ -54,6 +56,8 @@ export class Configuration {
     this.has_ambilight = config.has_ambilight as boolean;
     this.ambi_poweron = config.ambi_poweron as boolean || false;
     this.ambi_poweroff = config.ambi_poweroff as boolean || false;
+    this.vertical_inputs = config.vertical_inputs as boolean || false;
+    this.multirow_apps = config.multirow_apps as boolean || false;
 
     // tv settings
     this.has_tv_channels = !config.has_tv_channels as boolean || true;

@@ -101,6 +101,16 @@
         "required": true,
         "default": true
       },
+      "multirow_apps": {
+        "type": "boolean",
+        "required": false,
+        "default": false
+      },
+      "vertical_inputs": {
+        "type": "boolean",
+        "required": false,
+        "default": false
+      },
       "has_ambihue": {
         "type": "boolean",
         "required": true,
@@ -277,6 +287,20 @@
           "notitle": true,
           "type": "help",
           "helpvalue": "<p> <b>TV</b> only activates WatchTV. <br> <b>App</b> opens an app from your home-bar. <br> <b>Source</b> changes the TVs current input. <br> <b>Channel</b> selects the given channel number.<br> <b>Switch</b> will allow Siri to activate the input. This <b>will</b> clutter your HomeKit! </p>"
+        },
+
+        {
+          "key": "vertical_inputs",
+          "title": "Vertical inputs",
+          "description": "Indicates that your Inputs are arranged vertically",
+          "notitle": false
+        },
+
+        {
+          "key": "multirow_apps",
+          "title": "Multirow Apps",
+          "description": "Indicates that your Apps are on multiple rows.",
+          "notitle": false
         },
         {
           "key": "inputs",
