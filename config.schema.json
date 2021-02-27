@@ -1,7 +1,7 @@
 {
   "pluginAlias": "SaphiTV",
   "pluginType": "platform",
-  "singular": true,
+  "singular": false,
   "schema": {
     "type": "object",
     "properties": {
