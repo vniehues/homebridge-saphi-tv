@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Service, PlatformAccessory, Categories, CharacteristicValue } from 'homebridge';
+import { Service, PlatformAccessory, Categories, CharacteristicValue, Characteristic } from 'homebridge';
 import ping from 'ping';
 import { Input } from './input';
 import { InputType } from './inputType';
@@ -80,7 +80,7 @@ export class TelevisionAccessory {
           })
           .on('set', (newValue, callback) => {
             this.SetAmbiHue(newValue);
-            callback(null);
+            callback(this.TvState.AmbiHueActive);
             this.platform.log.debug('set AmbiHue => ' + newValue);
           });
       }
@@ -228,7 +228,7 @@ export class TelevisionAccessory {
           .setCharacteristic(this.platform.Characteristic.Name, input.name)
           .getCharacteristic(this.platform.Characteristic.On)
           .on('set', (newValue, callback) => {
-            callback(null);
+            callback(false);
             if (newValue === true) {
               if (this.TvState.TvActive === false) {
                 this.SetActive(this.platform.Characteristic.Active.ACTIVE);
@@ -238,7 +238,7 @@ export class TelevisionAccessory {
             }
           })
           .on('get', (callback) => {
-            callback(false);
+            callback(1);
           });
       });
     }
