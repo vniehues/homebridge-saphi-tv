@@ -54,6 +54,7 @@ What's next?
 Some whishful thinking:
 - Auto detect the TV in your local network
 - Find a way to get the current channel/app/input
+- Expose to Homekit as a proper remote
 
 # Plug-in configuration
  For the best experience you should use the built-in config.
