@@ -287,7 +287,9 @@ export class TelevisionAccessory {
 
       if (this.config.has_ambihue && this.config.ambi_poweron) {
 
-        this.utilities.wolRequest(this.config.wol_url);
+        await this.utilities.wolRequest(this.config.wol_url);
+        await this.utilities.POST(this.config.power_url, power_on_body);
+        
         await this.utilities.waitFor(this.config.startup_time)
           .then(() => {
             this.platform.log.debug('Setting AmbiHue after ', this.config.startup_time);
@@ -298,6 +300,7 @@ export class TelevisionAccessory {
           );
       } else {
         await this.utilities.wolRequest(this.config.wol_url);
+        await this.utilities.POST(this.config.power_url, power_on_body);
       }
     } else {
 
@@ -313,7 +316,7 @@ export class TelevisionAccessory {
             },
           );
       } else {
-        await this.utilities.POST(this.config.input_url, { key: 'Standby' });
+        await this.utilities.POST(this.config.power_url, power_off_body);
       }
     }
   }
