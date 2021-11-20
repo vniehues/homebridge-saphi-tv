@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Service, PlatformAccessory, Categories, CharacteristicValue, Characteristic } from 'homebridge';
+import { Service, PlatformAccessory, Categories, CharacteristicValue } from 'homebridge';
 import ping from 'ping';
 import { Input } from './input';
 import { InputType } from './inputType';
@@ -288,7 +288,7 @@ export class TelevisionAccessory {
       if (this.config.has_ambihue && this.config.ambi_poweron) {
 
         await this.utilities.wolRequest(this.config.wol_url);
-        await this.utilities.POST(this.config.power_url, power_on_body);
+        await this.utilities.POST(this.config.power_url, this.power_on_body);
         
         await this.utilities.waitFor(this.config.startup_time)
           .then(() => {
@@ -300,7 +300,7 @@ export class TelevisionAccessory {
           );
       } else {
         await this.utilities.wolRequest(this.config.wol_url);
-        await this.utilities.POST(this.config.power_url, power_on_body);
+        await this.utilities.POST(this.config.power_url, this.power_on_body);
       }
     } else {
 
@@ -316,7 +316,7 @@ export class TelevisionAccessory {
             },
           );
       } else {
-        await this.utilities.POST(this.config.power_url, power_off_body);
+        await this.utilities.POST(this.config.power_url, this.power_off_body);
       }
     }
   }

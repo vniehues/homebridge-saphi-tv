@@ -14,7 +14,10 @@ export class Utilities {
       headers: {
         'Content-Type': 'application/json',
       },
-    }, this.config.timeout, 'Timeout Error');
+    }, this.config.timeout, 'Timeout Error')
+      .catch(err => { 
+        this.platform.log.debug('Error', err);
+      });
   }
 
   async POST(url: string, body: unknown): Promise<Response> {
@@ -24,7 +27,9 @@ export class Utilities {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-    }, this.config.timeout, 'Timeout Error');
+    }, this.config.timeout, 'Timeout Error').catch(err => {
+      this.platform.log.debug('Error', err);
+    });
   }
 
   waitFor(ms: number) {
