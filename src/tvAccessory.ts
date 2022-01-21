@@ -41,7 +41,9 @@ export class TelevisionAccessory {
     this.config = utilities.config;
     this.platform = utilities.platform;
 
-    this.config.inputs = this.config.inputs.filter(x => x.name && x.type && (x.position || x.position === 0 || x.type === InputType.TV));
+    if (this.config.inputs) {
+      this.config.inputs = this.config.inputs?.filter(x => x.name && x.type && (x.position || x.position === 0 || x.type === InputType.TV));
+    }
 
     this.platform.log.debug('times: ', this.config.startup_time, this.config.polling_interval, this.config.input_delay, this.config.timeout);
     this.platform.log.debug('inputs: ', this.config.inputs);
