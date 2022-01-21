@@ -230,7 +230,7 @@ export class TelevisionAccessory {
           .setCharacteristic(this.platform.Characteristic.Name, input.name)
           .getCharacteristic(this.platform.Characteristic.On)
           .on('set', (newValue, callback) => {
-            callback(false);
+            callback(null, false);
             if (newValue === true) {
               if (this.TvState.TvActive === false) {
                 this.SetActive(this.platform.Characteristic.Active.ACTIVE);
