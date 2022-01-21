@@ -82,7 +82,7 @@ export class TelevisionAccessory {
           })
           .on('set', (newValue, callback) => {
             this.SetAmbiHue(newValue);
-            callback(this.TvState.AmbiHueActive);
+            callback(null, this.TvState.AmbiHueActive);
             this.platform.log.debug('set AmbiHue => ' + newValue);
           });
       }
