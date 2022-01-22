@@ -35,7 +35,7 @@ export class Configuration {
     this.inputs = config.inputs as [];
     this.name = config.name as string;
 
-    if(!this.wol_url.startsWith('wol://')) {
+    if(!this.wol_url?.startsWith('wol://')) {
       this.wol_url = 'wol://'+this.wol_url;
     }
 
