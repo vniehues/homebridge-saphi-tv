@@ -35,7 +35,7 @@
     "@typescript-eslint/parser": "^5.10.0",
     "eslint": "^8.7.0",
     "homebridge": "^1.4.0",
-    "node-fetch": "^3.2.0",
+    "node-fetch": "^2.6.7",
     "nodemon": "^2.0.15",
     "rimraf": "^3.0.2",
     "ts-node": "^10.4.0",
@@ -43,8 +43,6 @@
   },
   "dependencies": {
     "fetch-timeout": "0.0.2",
-    "homebridge-saphi-tv": "^1.0.0",
-    "node-fetch": "^3.2.0",
     "np": "^7.6.0",
     "ping": "^0.4.1",
     "wake_on_lan": "^1.0.0"
