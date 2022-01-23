@@ -2,12 +2,12 @@
   <img src="https://raw.githubusercontent.com/vniehues/saphi_tv/master/homebridge-color-round.png" width="250">
 </p>
 <span align="center">
-  
-  [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
-  [![Downloads](https://img.shields.io/npm/dt/homebridge-saphi-tv)](https://www.npmjs.com/package/homebridge-saphi-tv)
-  [![Version](https://img.shields.io/npm/v/homebridge-saphi-tv)](https://www.npmjs.com/package/homebridge-saphi-tv)
-  [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/vniehues/EUR)
-
+    
+  [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple?style=for-the-badge&scale=1.38)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+  [![Downloads](https://img.shields.io/npm/dt/homebridge-saphi-tv?style=for-the-badge)](https://www.npmjs.com/package/homebridge-linak)
+  [![Version](https://img.shields.io/npm/v/homebridge-saphi-tv?style=for-the-badge)](https://www.npmjs.com/package/homebridge-linak)
+  [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge)](https://paypal.me/vniehues/EUR)
+    
 </span>
 
 # Homebridge Philips TV SaphiOS
